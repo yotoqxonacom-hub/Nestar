@@ -43,13 +43,13 @@ export class Member {
     memberProperties?: number | undefined;
 
     @Field(() => Int, { nullable: true })
-    memberArticle?: number | undefined;
+    memberArticles?: number | undefined;
 
     @Field(() => Int, { nullable: true })
-    memberFollower?: number | undefined;
+    memberFollowers?: number | undefined;
 
     @Field(() => Int, { nullable: true })
-    memberFollowing?: number | undefined;
+    memberFollowings?: number | undefined;
 
     @Field(() => Int, { nullable: true })
     memberPoints?: number | undefined;
@@ -61,7 +61,7 @@ export class Member {
     memberViews?: number | undefined;
 
     @Field(() => Int, { nullable: true })
-    memberComment?: number | undefined;
+    memberComments?: number | undefined;
 
     @Field(() => Int, { nullable: true })
     memberRank?: number | undefined;
