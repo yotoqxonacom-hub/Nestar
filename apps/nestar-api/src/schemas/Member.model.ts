@@ -110,8 +110,9 @@ export const MemberSchema = new Schema({
         default: 0,
     },
 
-    delatedAt: {
+    deletedAt: {
         type: Date,
+        default: null,
     },
 
 },
