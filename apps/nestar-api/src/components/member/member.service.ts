@@ -18,8 +18,10 @@ export class MemberService {
             //todo auth
             return result as unknown as Member;
         } catch (err) {
-            console.log("Error on serviceModel while logining:", err)
-            throw new BadRequestException(err)
+            console.log(
+                "Error on serviceModel while logining:",
+                err instanceof Error ? err.message : String(err));
+            throw new InternalServerErrorException(Message.USED_MEMBER_NICK_OR_PHONE);
         }
 
     }
