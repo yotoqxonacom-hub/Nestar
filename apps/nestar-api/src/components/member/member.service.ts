@@ -19,6 +19,7 @@ export class MemberService {
 
             const result = await this.memberModel.create(input)
             //todo auth
+            result.accessToken = await this.authService.createToken(result);
             return result as unknown as Member;
         } catch (err) {
             console.log(
@@ -51,6 +52,7 @@ export class MemberService {
             throw new InternalServerErrorException(Message.WRONG_PASSWORD);
         }
 
+        response.accessToken = await this.authService.createToken(response);
         // Agar hammasi joyida bo‘lsa, foydalanuvchini qaytaramiz
         return response;
     }

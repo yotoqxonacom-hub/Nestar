@@ -83,4 +83,6 @@ export class Member {
     @Field(() => Date)
     updatedAt?: Date | undefined
 
+    @Field(() => String, { nullable: true })
+    accessToken?: string;
 }
