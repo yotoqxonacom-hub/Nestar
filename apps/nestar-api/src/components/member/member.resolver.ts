@@ -37,4 +37,22 @@ export class MemberResolver {
         return this.memberService.getMember();
     }
 
+    /** ADMIN **/
+    // Authorization: ADMIN
+    @Mutation(() => String)
+    async getAllMembersByAdmin(): Promise<string> {
+        // Bu yerda barcha a'zolarni admin orqali olish logikasi bo'ladi
+        return this.memberService.getAllMembersByAdmin();
+    }
+
+    // Authorization: ADMIN
+    @Mutation(() => String)
+    async updateMemberByAdmin(): Promise<string> {
+        console.log("Mutation: updateMemberByAdmin");
+        // Bu yerda a'zoni admin tomonidan yangilash logikasi bo'ladi
+        return this.memberService.updateMemberByAdmin();
+    }
+
+
+
 }
