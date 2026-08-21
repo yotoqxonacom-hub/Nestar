@@ -6,6 +6,10 @@ import { Member } from '../../libs/dto/member/member';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import type { ObjectId } from 'mongoose';
+import { Roles } from '../auth/decorators/roles.decorator (2)';
+import { MemberType } from '../../libs/enums/member.enum';
+import { RolesGuard } from '../auth/guards/roles.guard (1)';
+import { log } from 'console';
 
 
 @Resolver()
@@ -49,6 +53,21 @@ export class MemberResolver {
     }
 
 
+    @Roles(MemberType.USER)
+    @UseGuards(RolesGuard)
+    @Query(() => String)
+    public async checkAuthRoles(@AuthMember() authMember: Member): Promise<string> {
+        console.log(" query: checkAuthRoles");
+        console.log("mutation memberNick");
+        console.log("member:", authMember);
+
+
+        return `hi ${authMember.memberNick},
+         you are ${authMember.memberType},
+          (memberId ${authMember._id})`;
+    }
+
+
 
     @Query(() => String)
     public async getMember(): Promise<string> {
@@ -58,8 +77,11 @@ export class MemberResolver {
 
     /** ADMIN **/
     // Authorization: ADMIN
+    @Roles(MemberType.ADMIN)
+    @UseGuards(RolesGuard)
     @Mutation(() => String)
-    async getAllMembersByAdmin(): Promise<string> {
+    async getAllMembersByAdmin(@AuthMember() authMember: Member): Promise<string> {
+        console.log("authMember:", authMember.memberType);
         // Bu yerda barcha a'zolarni admin orqali olish logikasi bo'ladi
         return this.memberService.getAllMembersByAdmin();
     }

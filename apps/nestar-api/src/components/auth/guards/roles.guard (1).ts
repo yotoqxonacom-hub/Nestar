@@ -8,7 +8,7 @@ export class RolesGuard implements CanActivate {
 	constructor(
 		private reflector: Reflector,
 		private authService: AuthService,
-	) {}
+	) { }
 
 	async canActivate(context: ExecutionContext | any): Promise<boolean> {
 		const roles = this.reflector.get<string[]>('roles', context.getHandler());
@@ -23,7 +23,8 @@ export class RolesGuard implements CanActivate {
 
 			const token = bearerToken.split(' ')[1],
 				authMember = await this.authService.verifyToken(token),
-				hasRole = () => roles.indexOf(authMember.memberType) > -1,
+				memberType = authMember?.memberType,
+				hasRole = () => memberType !== undefined && roles.indexOf(memberType) > -1,
 				hasPermission: boolean = hasRole();
 
 			if (!authMember || !hasPermission) throw new ForbiddenException(Message.ONLY_SPECIFIC_ROLES_ALLOWED);
@@ -34,5 +35,6 @@ export class RolesGuard implements CanActivate {
 		}
 
 		// description => http, rpc, gprs and etc are ignored
+		return false;
 	}
 }
