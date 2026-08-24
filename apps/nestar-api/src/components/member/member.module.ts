@@ -4,6 +4,7 @@ import { MemberService } from './member.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import MemberSchema from '../../schemas/Member.model';
 import { AuthModule } from '../auth/auth.module';
+import { ViewModule } from '../view/view.module';
 
 @Module({
     imports: [MongooseModule.forFeature([{
@@ -11,7 +12,10 @@ import { AuthModule } from '../auth/auth.module';
         schema: MemberSchema
     }]),
 
-        AuthModule],
+        AuthModule,
+        ViewModule
+
+    ],
 
 
     providers: [MemberResolver, MemberService]
