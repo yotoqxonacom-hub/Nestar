@@ -11,6 +11,7 @@ import { MemberType } from '../../libs/enums/member.enum';
 import { RolesGuard } from '../auth/guards/roles.guard (1)';
 import { log } from 'console';
 import { MemberUpdate } from '../../libs/dto/memberUpdate';
+import { shapeIntoMongoObjectId } from '../../libs/config';
 
 
 @Resolver()
@@ -44,7 +45,7 @@ export class MemberResolver {
     }
 
 
-    @Roles(MemberType.USER)
+    @Roles(MemberType.USER, MemberType.AGENT)
     @UseGuards(RolesGuard)
     @Query(() => String)
     public async checkAuthRoles(@AuthMember() authMember: Member): Promise<string> {
@@ -69,10 +70,11 @@ export class MemberResolver {
 
 
 
-    @Query(() => String)
-    public async getMember(): Promise<string> {
+    @Query(() => Member)
+    public async getMember(@Args("memberId") input: string): Promise<Member> {
         console.log("query: getMember")
-        return this.memberService.getMember();
+        const targetId = shapeIntoMongoObjectId(input);
+        return this.memberService.getMember(targetId);
     }
 
     /** ADMIN **/
