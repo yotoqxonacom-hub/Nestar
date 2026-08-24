@@ -19,18 +19,34 @@ import { DatabaseModule } from './database/database.module';
     formatError: (error: any) => {
       console.log('error:', error);
 
+
+      const res = error?.extensions?.originalError || error?.extensions?.response;
+      const rawMsg = res?.message || error?.message;
+
       const graphQLFormattedError = {
-        code: error?.extensions?.code || 'INTERNAL_SERVER_ERROR',
-        message: Array.isArray(error?.extensions?.exception?.response?.message)
-          ? error.extensions.exception.response.message[0] // massiv bo‘lsa birinchi elementni olamiz
-          : error?.extensions?.exception?.response?.message ||
-          error?.extensions?.response?.message ||
-          error?.message,
+        message: Array.isArray(rawMsg) ? rawMsg.join('; ') : rawMsg,
+        extensions: {
+          code: error?.extensions?.code || 'BAD_REQUEST',
+        },
       };
 
       console.log('GRAPHQL GLOBAL ERR:', graphQLFormattedError);
       return graphQLFormattedError;
-    }
+    },
+
+    /** 
+          const graphQLFormattedError = {
+            code: error?.extensions?.code || 'INTERNAL_SERVER_ERROR',
+            message: Array.isArray(error?.extensions?.exception?.response?.message)
+              ? error.extensions.exception.response.message[0] // massiv bo‘lsa birinchi elementni olamiz
+              : error?.extensions?.exception?.response?.message ||
+              error?.extensions?.response?.message ||
+              error?.message,
+          };
+    
+          console.log('GRAPHQL GLOBAL ERR:', graphQLFormattedError);
+          return graphQLFormattedError;
+        }*/
 
 
   }),
