@@ -34,20 +34,6 @@ import { DatabaseModule } from './database/database.module';
       return graphQLFormattedError;
     },
 
-    /** 
-          const graphQLFormattedError = {
-            code: error?.extensions?.code || 'INTERNAL_SERVER_ERROR',
-            message: Array.isArray(error?.extensions?.exception?.response?.message)
-              ? error.extensions.exception.response.message[0] // massiv bo‘lsa birinchi elementni olamiz
-              : error?.extensions?.exception?.response?.message ||
-              error?.extensions?.response?.message ||
-              error?.message,
-          };
-    
-          console.log('GRAPHQL GLOBAL ERR:', graphQLFormattedError);
-          return graphQLFormattedError;
-        }*/
-
 
   }),
     ComponentsModule,
