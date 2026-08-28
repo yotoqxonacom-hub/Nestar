@@ -7,6 +7,7 @@ export const availableMembersSort = ["createdAt", "updatedAt", "memberLikes", "m
 
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
+export const validExtensions = ['.jpg', '.jpeg', '.png'];
 
 export const validMimeTypes = ['image/png', 'image/jpg', 'image/jpeg'];
 export const getSerialForImage = (filename: string) => {
