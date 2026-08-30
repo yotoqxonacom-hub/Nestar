@@ -3,7 +3,7 @@ import { PropertyService } from './property.service';
 import { Properties, Property } from '../../libs/dto/property/property';
 import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { Roles } from '../auth/decorators/roles.decorator (2)';
-import { UseGuards } from '@nestjs/common';
+import { InternalServerErrorException, UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../auth/guards/roles.guard (1)';
 import { MemberType } from '../../libs/enums/member.enum';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
@@ -11,6 +11,7 @@ import * as mongoose from 'mongoose';
 import { WithoutGuard } from '../auth/guards/without.guard (1)';
 import { shapeIntoMongoObjectId } from '../../libs/config';
 import { PropertyUpdate } from '../../libs/dto/property/property.update';
+import { Message } from '../../libs/enums/common.enum';
 
 @Resolver()
 export class PropertyResolver {
@@ -85,6 +86,16 @@ export class PropertyResolver {
 	): Promise<Properties> {
 		console.log('query: getAllPropertiesByAdmin');
 		return await this.propertyService.getAllPropertiesByAdmin(input) as unknown as Properties;
+	}
+
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+	@Mutation((returns) => Property)
+	public async updatePropertyByAdmin(@Args('input') input: PropertyUpdate): Promise<Property> {
+		console.log('Mutation: updatePropertyByAdmin');
+		input._id = shapeIntoMongoObjectId(input._id);
+		return await this.propertyService.updatePropertyByAdmin(input);
 	}
 
 
