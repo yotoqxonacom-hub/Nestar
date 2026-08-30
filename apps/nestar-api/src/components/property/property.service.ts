@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
+import { AgentPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { Properties, Property } from '../../libs/dto/property/property';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { MemberService } from '../member/member.service';
@@ -99,8 +99,17 @@ export class PropertyService {
 	}
 
 
-	public async getProperties(memberId: mongoose.ObjectId, input: PropertiesInquiry): Promise<Properties[]> {
-		const match = { propertyStatus: PropertyStatus.ACTIVE };
+	public async getProperties(
+		memberId: mongoose.ObjectId,
+		input: PropertiesInquiry,
+	): Promise<Properties> {
+		const match: any = {};
+		if (input.search?.propertyStatus) {
+			match.propertyStatus = input?.search.propertyStatus;
+		} else {
+			match.propertyStatus = { $in: [PropertyStatus.ACTIVE, PropertyStatus.SOLD] };
+		}
+
 		const sort = { [input?.sort ?? "createdAt"]: input?.direction ?? Direction.DESC };
 
 		this.shapeMatchQuery(match, input);
@@ -131,13 +140,15 @@ export class PropertyService {
 			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		}
 
+		const data = result[0];
+		const total = data.metaCounter[0]?.total ?? 0;
+
 		return {
-			list: result[0].list,
-			metaCounter: {
-				total: result[0].metaCounter[0]?.total ?? 0,
-			},
+			...data,
+			metaCounter: { total },
 		};
 	}
+
 
 
 	private shapeMatchQuery<T>(match: T, input: PropertiesInquiry): void {
@@ -165,6 +176,59 @@ export class PropertyService {
 		if (options) match['$or'] = options.map(option => ({ [option]: true }));
 		if (text) match['propertyTitle'] = { $regex: text, $options: 'i' };
 	}
+
+
+	public async getAgentProperties(
+		memberId: mongoose.ObjectId,
+		input: AgentPropertiesInquiry,
+	): Promise<Properties> {
+		if (input.propertyStatus === PropertyStatus.DELETE) {
+			throw new BadRequestException('Property status cannot be DELETE');
+		}
+
+		const match: any = { memberId };
+
+		if (input.search?.propertyStatus) {
+			match.propertyStatus = input.search.propertyStatus;
+		} else {
+			match.propertyStatus = { $in: [PropertyStatus.ACTIVE, PropertyStatus.SOLD] };
+		}
+
+		const sort = { [input?.sort ?? "createdAt"]: input?.direction ?? Direction.DESC };
+		const page = input?.page ?? 1;
+		const limit = input?.limit ?? 10;
+
+		const result = await this.propertyModel
+			.aggregate([
+				{ $match: match },
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [
+							{ $skip: (page - 1) * limit },
+							{ $limit: limit },
+							lookupMember,
+							{ $unwind: '$memberData' },
+						],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+
+		if (!result || result.length === 0) {
+			throw new InternalServerErrorException('NO_DATA_FOUND');
+		}
+
+		const data = result[0];
+		const total = data.metaCounter[0]?.total ?? 0;
+
+		return {
+			...data,
+			metaCounter: { total },
+		};
+	}
+
 
 
 }
