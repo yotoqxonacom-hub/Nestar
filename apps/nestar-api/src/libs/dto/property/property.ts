@@ -62,10 +62,9 @@ export class Property {
 	@Field(() => String)
 	memberId: ObjectId | undefined;
 
-	@Field(() => Date, { nullable: true })
+
 	soldAt?: Date;
 
-	@Field(() => Date, { nullable: true })
 	deletedAt?: Date;
 
 	@Field(() => Date, { nullable: true })

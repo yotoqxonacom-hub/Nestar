@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { AgentPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
+import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { Properties, Property } from '../../libs/dto/property/property';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { MemberService } from '../member/member.service';
@@ -73,12 +73,17 @@ export class PropertyService {
 	}
 
 	public async updateProperty(memberId: mongoose.ObjectId, input: PropertyUpdate): Promise<Property> {
-		if (input.propertyStatus === PropertyStatus.SOLD) {
-			input.soldAt = moment().toDate();
-		}
-		if (input.propertyStatus === PropertyStatus.DELETE) {
-			input.deletedAt = moment().toDate();
-		}
+		let { propertyStatus, soldAt, deletedAt } = input
+		const search: T = {
+			_id: input._id,
+			memberId: memberId,
+			propertyStatus: PropertyStatus.ACTIVE,
+		};
+
+		if (input.propertyStatus === PropertyStatus.SOLD) soldAt = moment().toDate();
+
+		else if (input.propertyStatus === PropertyStatus.DELETE) deletedAt = moment().toDate();
+
 
 		const result = await this.propertyModel
 			.findOneAndUpdate({ _id: input._id }, input, { new: true })
@@ -229,6 +234,45 @@ export class PropertyService {
 		};
 	}
 
+	/** ADMIN **/
+
+
+	public async getAllPropertiesByAdmin(input: AllPropertiesInquiry): Promise<Properties[]> {
+		const { propertyStatus, propertyLocationList } = input?.search ?? {};
+		const match: any = {};
+		const sort: any = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
+
+		if (propertyStatus) match.propertyStatus = propertyStatus;
+		if (propertyLocationList) match.propertyLocation = { $in: propertyLocationList };
+
+		const result = await this.propertyModel
+			.aggregate([
+				{ $match: match },
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [
+							{ $skip: ((input?.page ?? 1) - 1) * (input?.limit ?? 10) },
+							{ $limit: input?.limit ?? 10 },
+							lookupMember,
+							{ $unwind: '$memberData' },
+						],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+
+		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+
+		const data = result[0];
+		const total = data.metaCounter[0]?.total ?? 0;
+
+		return {
+			...data,
+			metaCounter: { total },
+		};
+	}
 
 
 }
