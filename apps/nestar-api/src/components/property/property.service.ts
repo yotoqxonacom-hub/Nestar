@@ -305,4 +305,13 @@ export class PropertyService {
 	}
 
 
+	public async removePropertyByAdmin(propertyId: mongoose.ObjectId): Promise<Property> {
+		const search = { _id: propertyId, propertyStatus: PropertyStatus.DELETE };
+		const result = await this.propertyModel.findOneAndDelete(search).exec();
+		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
+
+		return result;
+	}
+
+
 }
