@@ -14,7 +14,7 @@
     "sourceMap": true,
     "rootDir": "./apps",
     "outDir": "./dist",
-    "baseUrl": "./", //@ts-ignore
+    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
