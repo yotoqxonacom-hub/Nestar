@@ -9,6 +9,8 @@ import { StatisticModifier, T } from '../../libs/types/common';
 import { PropertyStatus } from '../../libs/enums/property.enum (1)';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { ViewService } from '../view/view.service';
+import { PropertyUpdate } from '../../libs/dto/property/property.update';
+import moment from 'moment';
 
 @Injectable()
 export class PropertyService {
@@ -65,6 +67,32 @@ export class PropertyService {
 				{ new: true },
 			)
 			.exec()) as Property | null;
+	}
+
+	public async updateProperty(memberId: ObjectId, input: PropertyUpdate): Promise<Property> {
+		if (input.propertyStatus === PropertyStatus.SOLD) {
+			input.soldAt = moment().toDate();
+		}
+		if (input.propertyStatus === PropertyStatus.DELETE) {
+			input.deletedAt = moment().toDate();
+		}
+
+		const result = await this.propertyModel
+			.findOneAndUpdate({ _id: input._id }, input, { new: true })
+			.lean()
+			.exec();
+
+		if (!result) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+
+		if (input.propertyStatus === PropertyStatus.SOLD || input.propertyStatus === PropertyStatus.DELETE) {
+			await this.memberService.memberStatsEditor({
+				_id: result.memberId as unknown as ObjectId,
+				targetKey: 'propertyCount',
+				modifier: -1,
+			});
+		}
+
+		return result;
 	}
 
 
