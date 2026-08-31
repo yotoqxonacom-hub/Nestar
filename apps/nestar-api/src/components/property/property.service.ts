@@ -86,7 +86,7 @@ export class PropertyService {
 
 
 		const result = await this.propertyModel
-			.findOneAndUpdate({ _id: input._id }, input, { new: true })
+			.findOneAndUpdate(search, input, { new: true })
 			.lean()
 			.exec();
 
@@ -95,7 +95,7 @@ export class PropertyService {
 		if (input.propertyStatus === PropertyStatus.SOLD || input.propertyStatus === PropertyStatus.DELETE) {
 			await this.memberService.memberStatsEditor({
 				_id: result.memberId as unknown as mongoose.ObjectId,
-				targetKey: 'propertyCount',
+				targetKey: 'memberProperties',
 				modifier: -1,
 			});
 		}
