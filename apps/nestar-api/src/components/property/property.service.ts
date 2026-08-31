@@ -86,7 +86,7 @@ export class PropertyService {
 
 
 		const result = await this.propertyModel
-			.findOneAndUpdate({ _id: input._id }, input, { new: true })
+			.findOneAndUpdate(search, input, { new: true })
 			.lean()
 			.exec();
 
