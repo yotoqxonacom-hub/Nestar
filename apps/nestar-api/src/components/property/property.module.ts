@@ -15,5 +15,6 @@ import { MemberModule } from '../member/member.module';
 		MemberModule, // MemberService shu moduldan export qilinadi
 	],
 	providers: [PropertyResolver, PropertyService],
+	exports: [PropertyService], // PropertyService ni boshqa modullarda ishlatish uchun export qilinadi
 })
 export class PropertyModule { }
