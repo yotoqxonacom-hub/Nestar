@@ -9,7 +9,7 @@ import * as mongoose from 'mongoose';
 import { MemberType } from '../../libs/enums/member.enum';
 import { Roles } from '../auth/decorators/roles.decorator (2)';
 import { RolesGuard } from '../auth/guards/roles.guard (1)';
-import { MemberUpdate } from '../../libs/dto/memberUpdate';
+import { MemberUpdate } from '../../libs/dto/member/memberUpdate';
 import { getSerialForImage, shapeIntoMongoObjectId, validMimeTypes, validExtensions } from '../../libs/config';
 import * as path from 'path';
 import { WithoutGuard } from '../auth/guards/without.guard (1)';

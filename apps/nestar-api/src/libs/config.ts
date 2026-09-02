@@ -17,6 +17,14 @@ export const availablePropertySorts = [
     'propertyPrice',
 ];
 
+export const availableCommentsSorts = [
+    'createdAt',
+    'updatedAt',
+    'propertyLikes',
+    'propertyViews',
+    'propertyRank',
+    'propertyPrice',
+];
 
 // IMAGE CONFIGURATION (config.js)
 

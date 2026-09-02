@@ -6,7 +6,7 @@ import { Member, Members } from '../../libs/dto/member/member';
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { AuthService } from '../auth/auth.service';
-import { MemberUpdate } from '../../libs/dto/memberUpdate';
+import { MemberUpdate } from '../../libs/dto/member/memberUpdate';
 import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewService } from '../view/view.service';
 import { ViewInput } from '../view/view.input';
