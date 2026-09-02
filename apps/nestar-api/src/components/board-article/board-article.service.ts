@@ -9,8 +9,8 @@ import { BoardArticleStatus } from '../../libs/enums/board-article.enum (1)';
 import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { BoardArticleUpdate } from '../../libs/dto/board-articles/board-article.update (1)';
-import { BoardArticlesInquiry } from '../../libs/dto/board-articles/board-article.input (1)';
-import { shapeIntoMongoObjectId } from '../../libs/config';
+import { AllBoardArticlesInquiry, BoardArticlesInquiry } from '../../libs/dto/board-articles/board-article.input (1)';
+import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
 
 @Injectable()
 export class BoardArticleService {
@@ -171,6 +171,75 @@ export class BoardArticleService {
         };
     }
 
+    /** ADMIN **/
+    public async getAllBoardArticlesByAdmin(input: AllBoardArticlesInquiry): Promise<BoardArticles> {
+        const { articleStatus, articleCategory } = input.search ?? {};
+        const match: T = {};
+        const sort: T = { [input.sort ?? "createdAt"]: input?.direction ?? Direction.DESC };
+
+        if (articleStatus) match.articleStatus = articleStatus;
+        if (articleCategory) match.articleCategory = articleCategory;
+
+        const result = await this.boardArticleModel.aggregate([
+            { $match: match },
+            { $sort: sort },
+            {
+                $facet: {
+                    list: [
+                        { $skip: ((input.page ?? 1) - 1) * (input.limit ?? 10) },
+                        { $limit: input.limit ?? 10 },
+                        lookupMember,
+                        { $unwind: "$memberData" },
+                    ],
+                    metaCounter: [
+                        { $count: "total" }
+                    ]
+                },
+            },
+        ]).exec();
+
+        if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+        const data = result[0];
+
+        const total = data.metaCounter[0]?.total ?? 0;
+
+        return {
+            ...data,
+            metaCounter: [{ total }],
+        };
+    }
+
+
+    public async updateBoardArticleByAdmin(input: BoardArticleUpdate): Promise<BoardArticle> {
+        const { _id, articleStatus } = input;
+
+        const result = await this.boardArticleModel
+            .findOneAndUpdate({ _id: _id, articleStatus: BoardArticleStatus.ACTIVE }, input, {
+                new: true,
+            })
+            .exec();
+        if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
+
+        if (articleStatus === BoardArticleStatus.DELETE && result.memberId) {
+            await this.memberService.memberStatsEditor({
+                _id: result.memberId,
+                targetKey: 'memberArticles',
+                modifier: -1,
+            });
+        }
+
+        return result;
+    }
+
+    public async removeBoardArticleByAdmin(articleId: ObjectId): Promise<BoardArticle> {
+        const search: T = { _id: articleId, articleStatus: BoardArticleStatus.DELETE };
+        const result = await this.boardArticleModel.findOneAndDelete(search).exec();
+        if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
+
+        return result;
+    }
+
+
 
 
 
@@ -184,6 +253,5 @@ export class BoardArticleService {
             )
             .exec();
     }
-
 
 }
