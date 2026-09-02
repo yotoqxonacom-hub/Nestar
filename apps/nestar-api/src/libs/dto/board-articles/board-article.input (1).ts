@@ -63,7 +63,7 @@ export class BoardArticlesInquiry {
 	@Field(() => Direction, { nullable: true })
 	direction?: Direction;
 
-	@IsNotEmpty()
+	@IsOptional()
 	@Field(() => BAISearch)
 	search: BAISearch | undefined;
 }

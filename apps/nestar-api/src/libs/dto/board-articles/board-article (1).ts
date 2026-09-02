@@ -48,7 +48,7 @@ export class BoardArticle {
 }
 
 @ObjectType()
-export class BoardArticles {
+export default class BoardArticles {
 	@Field(() => [BoardArticle])
 	list: BoardArticle[] | undefined;
 
