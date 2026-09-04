@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { AgentsInquiry, LoginInput, MembebrsInquiry, MemberInput } from '../../libs/dto/member/member.input';
 import { Member, Members } from '../../libs/dto/member/member';
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
@@ -9,20 +9,29 @@ import { AuthService } from '../auth/auth.service';
 import { MemberUpdate } from '../../libs/dto/member/memberUpdate';
 import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewService } from '../view/view.service';
-import { ViewInput } from '../view/view.input';
+import { ViewInput } from '../../libs/dto/view/view.input';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { LikeGroup } from '../../libs/enums/like.enum (1)';
 import { LikeService } from '../like/like.service';
 import { LikeInput } from '../../libs/dto/like/like.input';
+import { Follower, Following, MeFollowed } from '../../libs/dto/follow/follow';
 
 @Injectable()
 export class MemberService {
 
-    constructor(@InjectModel("Member") private readonly memberModel: Model<Member>,
-        private authService: AuthService,
-        private viewService: ViewService,
-        private likeService: LikeService,
+    constructor(
+        @InjectModel("Member")
+        private readonly memberModel: Model<Member>,
+
+        @InjectModel("Follow")
+        private readonly followModel: Model<Follower | Following>,
+
+        private readonly authService: AuthService,
+        private readonly viewService: ViewService,
+        private readonly likeService: LikeService,
     ) { }
+
+
 
     public async signup(input: MemberInput): Promise<Member> {
         input.memberPassword = await this.authService.hashPassword(input.memberPassword)
@@ -108,10 +117,32 @@ export class MemberService {
                     }
                 }, { new: true }).exec();
                 targetMember.memberViews = (targetMember.memberViews ?? 0) + 1;
+
+                const likeInput: LikeInput = { memberId, likeRefId: targetId, likeGroup: LikeGroup.MEMBER };
+                targetMember.meLiked = await this.likeService.checkLikeExistance(likeInput) as unknown as typeof targetMember.meLiked;
+
+                targetMember.meFollowed = await this.checkSubscription(memberId, targetId) as unknown as typeof targetMember.meFollowed;
             }
         }
         return targetMember;
     }
+
+
+    private async checkSubscription(
+        followerId: ObjectId,
+        followingId: ObjectId,
+    ): Promise<MeFollowed[]> {
+        const result = await this.followModel
+            .findOne({ followingId: followingId, followerId: followerId })
+            .exec();
+
+        return result
+            ? [{ followerId: followerId, followingId: followingId, myFollowing: true }]
+            : [];
+    }
+
+
+
 
     public async getAgents(memberId: ObjectId, input: AgentsInquiry): Promise<Members> {
         const { text } = input.search;

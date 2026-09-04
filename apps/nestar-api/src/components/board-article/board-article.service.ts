@@ -63,7 +63,8 @@ export class BoardArticleService {
                     targetBoardArticle.articleViews++;
                 }
             }
-            // meliked
+            const likeInput: LikeInput = { memberId, likeRefId: articleId, likeGroup: LikeGroup.ARTICLE };
+            targetBoardArticle.meLiked = await this.likeService.checkLikeExistance(likeInput) as unknown as typeof targetBoardArticle.meLiked;
         }
 
         if (targetBoardArticle.memberId) {
@@ -194,7 +195,7 @@ export class BoardArticleService {
         const input: LikeInput = {
             memberId: memberId,
             likeRefId: likeRefId,
-            likeGroup: LikeGroup.PROPERTY,
+            likeGroup: LikeGroup.ARTICLE,
         };
 
         const modifier: number = await this.likeService.toggleLike(input);
