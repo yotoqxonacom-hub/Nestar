@@ -14,6 +14,10 @@ import moment from 'moment';
 import { WithoutGuard } from '../auth/guards/without.guard (1)';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
+import { LikeGroup } from '../../libs/enums/like.enum (1)';
+import { ObjectId } from 'mongoose';
+import { LikeService } from '../like/like.service';
+import { LikeInput } from '../../libs/dto/like/like.input';
 
 @Injectable()
 export class PropertyService {
@@ -21,6 +25,7 @@ export class PropertyService {
 		@InjectModel('Property') private readonly propertyModel: mongoose.Model<Property>,
 		private memberService: MemberService,
 		private viewService: ViewService,
+		private likeService: LikeService,
 	) { }
 
 	public async createProperty(input: PropertyInput): Promise<Property> {
@@ -233,6 +238,45 @@ export class PropertyService {
 			metaCounter: { total },
 		};
 	}
+
+
+
+	public async likeTargetProperty(
+		memberId: mongoose.ObjectId,
+		likeRefId: mongoose.ObjectId,
+	): Promise<Property> {
+
+		const target = await this.propertyModel.findOne({
+			_id: likeRefId,
+			propertyStatus: PropertyStatus.ACTIVE,
+		});
+
+		if (!target) {
+			throw new InternalServerErrorException('NO_DATA_FOUND');
+		}
+
+		const input: LikeInput = {
+			memberId: memberId,
+			likeRefId: likeRefId,
+			likeGroup: LikeGroup.PROPERTY,
+		};
+
+		const modifier: number = await this.likeService.toggleLike(input);
+
+		const result = await this.propertyStatsEditor({
+			_id: likeRefId,
+			targetKey: 'propertyLikes',
+			modifier,
+		});
+
+		if (!result) {
+			throw new InternalServerErrorException('SOMETHING_WENT_WRONG');
+		}
+
+		return result;
+	}
+
+
 
 	/** ADMIN **/
 

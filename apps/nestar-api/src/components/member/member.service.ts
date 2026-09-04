@@ -13,6 +13,7 @@ import { ViewInput } from '../view/view.input';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { LikeGroup } from '../../libs/enums/like.enum (1)';
 import { LikeService } from '../like/like.service';
+import { LikeInput } from '../../libs/dto/like/like.input';
 
 @Injectable()
 export class MemberService {
@@ -161,7 +162,7 @@ export class MemberService {
             throw new InternalServerErrorException('NO_DATA_FOUND');
         }
 
-        const input = {
+        const input: LikeInput = {
             memberId,
             likeRefId,
             likeGroup: LikeGroup.MEMBER,

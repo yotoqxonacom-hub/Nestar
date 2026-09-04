@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Model, ObjectId } from 'mongoose';
+import mongoose, { Model, ObjectId } from 'mongoose';
 import { MemberService } from '../member/member.service';
 import { ViewService } from '../view/view.service';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,12 +11,16 @@ import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { BoardArticleUpdate } from '../../libs/dto/board-articles/board-article.update (1)';
 import { AllBoardArticlesInquiry, BoardArticlesInquiry } from '../../libs/dto/board-articles/board-article.input (1)';
 import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
+import { LikeService } from '../like/like.service';
+import { LikeInput } from '../../libs/dto/like/like.input';
+import { LikeGroup } from '../../libs/enums/like.enum (1)';
 
 @Injectable()
 export class BoardArticleService {
     constructor(@InjectModel('BoardArticle') private readonly boardArticleModel: Model<BoardArticle>,
         private memberService: MemberService,
         private viewService: ViewService,
+        private likeService: LikeService
     ) { }
 
     public async createBoardArticle(memberId: any, input: any): Promise<BoardArticle> {
@@ -170,6 +174,46 @@ export class BoardArticleService {
             metaCounter: [{ total }],
         };
     }
+
+
+
+    public async likeTargetBoardArticle(
+        memberId: mongoose.ObjectId,
+        likeRefId: mongoose.ObjectId,
+    ): Promise<BoardArticle | null> {
+
+        const target = await this.boardArticleModel.findOne({
+            _id: likeRefId,
+            articleStatus: BoardArticleStatus.ACTIVE,
+        });
+
+        if (!target) {
+            throw new InternalServerErrorException('NO_DATA_FOUND');
+        }
+
+        const input: LikeInput = {
+            memberId: memberId,
+            likeRefId: likeRefId,
+            likeGroup: LikeGroup.PROPERTY,
+        };
+
+        const modifier: number = await this.likeService.toggleLike(input);
+
+        const result = await this.boardArticleStatsEditor({
+            _id: likeRefId,
+            targetKey: 'articleLikes',
+            modifier,
+        });
+
+        if (!result) {
+            throw new InternalServerErrorException('SOMETHING_WENT_WRONG');
+        }
+
+        return result;
+    }
+
+
+
 
     /** ADMIN **/
     public async getAllBoardArticlesByAdmin(input: AllBoardArticlesInquiry): Promise<BoardArticles> {
