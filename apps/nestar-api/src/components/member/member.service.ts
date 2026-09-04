@@ -11,13 +11,17 @@ import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewService } from '../view/view.service';
 import { ViewInput } from '../view/view.input';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
+import { LikeGroup } from '../../libs/enums/like.enum (1)';
+import { LikeService } from '../like/like.service';
 
 @Injectable()
 export class MemberService {
 
     constructor(@InjectModel("Member") private readonly memberModel: Model<Member>,
         private authService: AuthService,
-        private viewService: ViewService,) { }
+        private viewService: ViewService,
+        private likeService: LikeService,
+    ) { }
 
     public async signup(input: MemberInput): Promise<Member> {
         input.memberPassword = await this.authService.hashPassword(input.memberPassword)
@@ -143,6 +147,44 @@ export class MemberService {
         return result[0];
     }
 
+    public async likeTargetMember(
+        memberId: ObjectId,
+        likeRefId: ObjectId,
+    ): Promise<Member> {
+
+        const target = await this.memberModel.findOne({
+            _id: likeRefId,
+            memberStatus: MemberStatus.ACTIVE,
+        });
+
+        if (!target) {
+            throw new InternalServerErrorException('NO_DATA_FOUND');
+        }
+
+        const input = {
+            memberId,
+            likeRefId,
+            likeGroup: LikeGroup.MEMBER,
+        };
+
+        const modifier: number = await this.likeService.toggleLike(input);
+
+        const result = await this.memberStatsEditor({
+            _id: likeRefId,
+            targetKey: 'memberLikes',
+            modifier,
+        });
+
+        if (!result) {
+            throw new InternalServerErrorException('SOMETHING_WENT_WRONG');
+        }
+
+        return result;
+    }
+
+
+
+    /** ADMIN */
 
     public async getAllMembersByAdmin(input: MembebrsInquiry): Promise<Members> {
         const { memberStatus, memberType, text } = input.search;
