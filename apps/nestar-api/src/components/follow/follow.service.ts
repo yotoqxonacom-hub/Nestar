@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import FollowSchema from '../../schemas/Follow.model';
 import { Follower, Followers, Following, Followings } from '../../libs/dto/follow/follow';
-import { Model, Types } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { MemberService } from '../member/member.service';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { lookupFollowingData, lookupFollowerData } from '../../libs/config';
@@ -59,20 +59,21 @@ export class FollowService {
 	}
 
 
-	public async registerSubscription(
+	private async registerSubscription(
 		followerId: Types.ObjectId,
 		followingId: Types.ObjectId,
 	): Promise<Follower> {
-
-		const input = {
-			followerId,
-			followingId,
-		};
-
-		const result = await this.followModel.create(input);
-
-		return result;
+		try {
+			return await this.followModel.create({
+				followingId,
+				followerId,
+			});
+		} catch (err) {
+			console.log('Error, Service.model:', err instanceof Error ? err.message : err);
+			throw new BadRequestException(Message.CREATE_FAILED);
+		}
 	}
+
 
 	public async unsubscribe(followerId: Types.ObjectId, followingId: Types.ObjectId): Promise<Follower> {
 		const targetMember = await this.memberService.getMember(null as any, followingId as any);

@@ -13,7 +13,7 @@ import { PropertyUpdate } from '../../libs/dto/property/property.update';
 import moment from 'moment';
 import { WithoutGuard } from '../auth/guards/without.guard (1)';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
-import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
+import { lookUpAuthMemberLiked, lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
 import { LikeGroup } from '../../libs/enums/like.enum (1)';
 import { ObjectId } from 'mongoose';
 import { LikeService } from '../like/like.service';
@@ -141,6 +141,7 @@ export class PropertyService {
 						list: [
 							{ $skip: (page - 1) * limit },
 							{ $limit: limit },
+							lookUpAuthMemberLiked(memberId) as mongoose.PipelineStage.Lookup,
 							lookupMember,
 							{ $unwind: '$memberData' },
 						],
