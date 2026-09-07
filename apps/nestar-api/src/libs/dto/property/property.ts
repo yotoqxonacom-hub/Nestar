@@ -1,8 +1,9 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { type ObjectId } from 'mongoose';
 import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum (1)';
 import { Member, TotalCounter } from '../member/member';
 import { MeLiked } from '../like/like';
+import { IsNotEmpty, Min } from 'class-validator';
 
 @ObjectType()
 export class Property {
@@ -93,6 +94,19 @@ export class Properties {
 
 	@Field(() => TotalCounter, { nullable: true })
 	metaCounter: TotalCounter[] | undefined;
+}
+
+@InputType()
+export class OrdinaryInquiry {
+	@IsNotEmpty()
+	@Min(1)
+	@Field(() => Int)
+	page!: number;
+
+	@IsNotEmpty()
+	@Min(1)
+	@Field(() => Int)
+	limit!: number;
 }
 
 

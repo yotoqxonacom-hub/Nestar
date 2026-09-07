@@ -1,6 +1,6 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { PropertyService } from './property.service';
-import { Properties, Property } from '../../libs/dto/property/property';
+import { OrdinaryInquiry, Properties, Property } from '../../libs/dto/property/property';
 import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { Roles } from '../auth/decorators/roles.decorator (2)';
 import { InternalServerErrorException, UseGuards } from '@nestjs/common';
@@ -63,6 +63,28 @@ export class PropertyResolver {
 		console.log('Query: getProperties');
 		return await this.propertyService.getProperties(memberId, input) as unknown as Properties;
 	}
+
+	@UseGuards(AuthGuard)
+	@Query((returns) => Properties)
+	public async getFavorites(
+		@Args('input') input: OrdinaryInquiry,
+		@AuthMember('_id') memberId: mongoose.ObjectId,
+	): Promise<Properties> {
+		console.log('Query: getFavorites');
+		return await this.propertyService.getFavorites(memberId, input);
+	}
+
+
+	@UseGuards(AuthGuard)
+	@Query((returns) => Properties)
+	public async getVisited(
+		@Args('input') input: OrdinaryInquiry,
+		@AuthMember('_id') memberId: mongoose.ObjectId,
+	): Promise<Properties> {
+		console.log('Query: getVisited');
+		return await this.propertyService.getVisited(memberId, input);
+	}
+
 
 	@Roles(MemberType.AGENT)
 	@UseGuards(RolesGuard)

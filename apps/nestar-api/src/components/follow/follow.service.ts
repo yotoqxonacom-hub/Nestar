@@ -5,7 +5,7 @@ import { Follower, Followers, Following, Followings } from '../../libs/dto/follo
 import mongoose, { Model, ObjectId, Types } from 'mongoose';
 import { MemberService } from '../member/member.service';
 import { Direction, Message } from '../../libs/enums/common.enum';
-import { lookupFollowingData, lookupFollowerData, lookUpAuthMemberLiked } from '../../libs/config';
+import { lookupFollowingData, lookupFollowerData, lookUpAuthMemberLiked, lookupAuthMemberFollowed } from '../../libs/config';
 import { FollowInquiry } from '../../libs/dto/follow/follow.input';
 import { T } from '../../libs/types/common';
 
@@ -107,7 +107,7 @@ export class FollowService {
 							{ $skip: ((page ?? 1) - 1) * (limit ?? 10) },
 							{ $limit: limit ?? 10 },
 							lookUpAuthMemberLiked(memberId, "$followingId") as mongoose.PipelineStage.Lookup,
-							// meFollowed
+							lookupAuthMemberFollowed({ followerId: memberId, followingId: "$followingId" }) as mongoose.PipelineStage.Lookup,
 							lookupFollowingData,
 							{ $unwind: '$followingData' },
 						],

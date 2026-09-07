@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Like, MeLiked } from '../../libs/dto/like/like';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { Message } from '../../libs/enums/common.enum';
 import { T } from '../../libs/types/common';
+import { LikeGroup } from '../../libs/enums/like.enum (1)';
+import { OrdinaryInquiry, Properties } from '../../libs/dto/property/property';
 
 @Injectable()
 export class LikeService {
@@ -50,5 +52,60 @@ export class LikeService {
         return result ? [{ memberId: memberId, likeRefId: likeRefId, myFavorite: true }] : [];
     }
 
+
+    public async getFavoriteProperties(
+        memberId: mongoose.ObjectId,
+        input: OrdinaryInquiry
+    ): Promise<Properties> {
+        const { page, limit } = input;
+
+        const match = {
+            likeGroup: LikeGroup.PROPERTY,
+            memberId: memberId,
+        };
+
+        const data = await this.likeModel
+            .aggregate([
+                { $match: match },
+                { $sort: { updatedAt: -1 } },
+                {
+                    $lookup: {
+                        from: 'properties',              // qaysi kolleksiyadan olish
+                        localField: 'likeRefId',         // likeRefId orqali bog‘lash
+                        foreignField: '_id',             // properties dagi _id bilan solishtirish
+                        as: 'favoriteProperty',          // natija shu nom bilan chiqadi
+                    },
+                },
+                { $unwind: '$favoriteProperty' },    // arrayni elementlarga ajratish
+                {
+                    $facet: {
+                        list: [
+                            { $skip: (page - 1) * limit },
+                            { $limit: limit },
+                            {
+                                $lookup: {
+                                    from: 'members',
+                                    localField: 'favoriteProperty.memberId',
+                                    foreignField: '_id',
+                                    as: 'favoriteProperty.memberData',
+                                },
+                            },
+                            { $unwind: '$favoriteProperty.memberData' },
+                        ],
+                        metaCounter: [{ $count: 'total' }],
+                    },
+                },
+            ])
+            .exec();
+
+        const result: Properties = {
+            list: [],
+            metaCounter: data[0].metaCounter,
+        };
+
+        result.list = data[0].list.map((ele) => ele.favoriteProperty);
+
+        return result;
+    }
 
 }

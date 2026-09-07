@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, UseGuard
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
-import { Properties, Property } from '../../libs/dto/property/property';
+import { OrdinaryInquiry, Properties, Property } from '../../libs/dto/property/property';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { MemberService } from '../member/member.service';
 import { StatisticModifier, T } from '../../libs/types/common';
@@ -190,6 +190,16 @@ export class PropertyService {
 		if (squaresRange) match['propertySquare'] = { $gte: squaresRange.start, $lte: squaresRange.end };
 		if (options) match['$or'] = options.map(option => ({ [option]: true }));
 		if (text) match['propertyTitle'] = { $regex: text, $options: 'i' };
+	}
+
+
+
+	public async getFavorites(memberId: mongoose.ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+		return await this.likeService.getFavoriteProperties(memberId, input);
+	}
+
+	public async getVisited(memberId: mongoose.ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+		return await this.viewService.getVisitedProperties(memberId, input);
 	}
 
 
