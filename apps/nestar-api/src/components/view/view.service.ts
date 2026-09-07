@@ -6,6 +6,7 @@ import { ViewInput } from '../../libs/dto/view/view.input';
 import { T } from '../../libs/types/common';
 import { OrdinaryInquiry, Properties } from '../../libs/dto/property/property';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
+import { lookupFavorite } from '../../libs/config';
 
 @Injectable()
 export class ViewService {
@@ -56,6 +57,7 @@ export class ViewService {
                         list: [
                             { $skip: (page - 1) * limit },
                             { $limit: limit },
+                            lookupFavorite,
                             {
                                 $lookup: {
                                     from: 'members',

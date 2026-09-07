@@ -7,6 +7,7 @@ import { Message } from '../../libs/enums/common.enum';
 import { T } from '../../libs/types/common';
 import { LikeGroup } from '../../libs/enums/like.enum (1)';
 import { OrdinaryInquiry, Properties } from '../../libs/dto/property/property';
+import { lookupVisit } from '../../libs/config';
 
 @Injectable()
 export class LikeService {
@@ -82,6 +83,7 @@ export class LikeService {
                         list: [
                             { $skip: (page - 1) * limit },
                             { $limit: limit },
+                            lookupVisit,
                             {
                                 $lookup: {
                                     from: 'members',
