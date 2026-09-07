@@ -10,7 +10,7 @@ import { StatisticModifier, T } from '../../libs/types/common';
 import { ViewGroup } from '../../libs/enums/view.enum (1)';
 import { BoardArticleUpdate } from '../../libs/dto/board-articles/board-article.update (1)';
 import { AllBoardArticlesInquiry, BoardArticlesInquiry } from '../../libs/dto/board-articles/board-article.input (1)';
-import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
+import { lookUpAuthMemberLiked, lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
 import { LikeService } from '../like/like.service';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { LikeGroup } from '../../libs/enums/like.enum (1)';
@@ -130,6 +130,10 @@ export class BoardArticleService {
         }
 
         console.log("match:", match);
+        console.log("========== LIKE DEBUG ==========");
+        console.log("memberId:", memberId);
+        console.log("memberId type:", typeof memberId);
+        console.log("================================");
 
         const result = await this.boardArticleModel
             .aggregate([
@@ -148,6 +152,7 @@ export class BoardArticleService {
                             {
                                 $limit: input.limit ?? 10,
                             },
+                            lookUpAuthMemberLiked(memberId) as mongoose.PipelineStage.Lookup,
                         ],
 
                         metaCounter: [

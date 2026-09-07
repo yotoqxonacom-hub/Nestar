@@ -2,10 +2,10 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { InjectModel } from '@nestjs/mongoose';
 import FollowSchema from '../../schemas/Follow.model';
 import { Follower, Followers, Following, Followings } from '../../libs/dto/follow/follow';
-import { Model, ObjectId, Types } from 'mongoose';
+import mongoose, { Model, ObjectId, Types } from 'mongoose';
 import { MemberService } from '../member/member.service';
 import { Direction, Message } from '../../libs/enums/common.enum';
-import { lookupFollowingData, lookupFollowerData } from '../../libs/config';
+import { lookupFollowingData, lookupFollowerData, lookUpAuthMemberLiked } from '../../libs/config';
 import { FollowInquiry } from '../../libs/dto/follow/follow.input';
 import { T } from '../../libs/types/common';
 
@@ -106,7 +106,7 @@ export class FollowService {
 						list: [
 							{ $skip: ((page ?? 1) - 1) * (limit ?? 10) },
 							{ $limit: limit ?? 10 },
-							// meLiked
+							lookUpAuthMemberLiked(memberId, "$followingId") as mongoose.PipelineStage.Lookup,
 							// meFollowed
 							lookupFollowingData,
 							{ $unwind: '$followingData' },
@@ -138,7 +138,7 @@ export class FollowService {
 						list: [
 							{ $skip: ((page ?? 1) - 1) * (limit ?? 10) },
 							{ $limit: limit ?? 10 },
-							// meLiked
+							lookUpAuthMemberLiked(memberId, "$followerId") as mongoose.PipelineStage.Lookup,
 							// meFollowed
 							lookupFollowerData,
 							{ $unwind: '$followerData' },
