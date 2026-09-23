@@ -3,7 +3,7 @@ import { IsIn, IsNotEmpty, IsOptional, Length, Min } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { CommentGroup } from '../../enums/comment.enum (1)';
 import { Direction } from '../../enums/common.enum';
-import { availableCommentsSorts } from "../../config";
+import { availableCommentSorts } from "../../config";
 
 @InputType()
 export class CommentInput {
@@ -43,7 +43,7 @@ export class CommentsInquiry {
 	limit: number | undefined;
 
 	@IsOptional()
-	@IsIn(availableCommentsSorts)
+	@IsIn(availableCommentSorts)
 	@Field(() => String, { nullable: true })
 	sort?: string;
 

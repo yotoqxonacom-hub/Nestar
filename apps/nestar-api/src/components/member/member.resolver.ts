@@ -1,142 +1,157 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MemberService } from './member.service';
-import { InternalServerErrorException, UseGuards } from '@nestjs/common';
-import { AgentsInquiry, LoginInput, MemberInput, MembebrsInquiry } from '../../libs/dto/member/member.input';
+import {
+	AgentsInquiry,
+	LoginInput,
+	MemberInput,
+	MembersInquiry,
+} from '../../libs/dto/member/member.input';
 import { Member, Members } from '../../libs/dto/member/member';
+import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
-import * as mongoose from 'mongoose';
+import { ObjectId } from 'mongoose';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { MemberType } from '../../libs/enums/member.enum';
-import { Roles } from '../auth/decorators/roles.decorator (2)';
-import { RolesGuard } from '../auth/guards/roles.guard (1)';
-import { MemberUpdate } from '../../libs/dto/member/memberUpdate';
-import { getSerialForImage, shapeIntoMongoObjectId, validMimeTypes, validExtensions } from '../../libs/config';
-import * as path from 'path';
-import { WithoutGuard } from '../auth/guards/without.guard (1)';
-import { GraphQLUpload, FileUpload } from 'graphql-upload';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
+import {
+	getSerialForImage,
+	shapeIntoMongoObjectId,
+	validMimeTypes,
+} from '../../libs/config';
+import { WithoutGuard } from '../auth/guards/without.guard';
+import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal';
 import { createWriteStream } from 'fs';
 import { Message } from '../../libs/enums/common.enum';
 
 @Resolver()
 export class MemberResolver {
-	constructor(private readonly memberService: MemberService) { }
+	constructor(private readonly memberService: MemberService) {}
 
 	@Mutation(() => Member)
 	public async signup(@Args('input') input: MemberInput): Promise<Member> {
 		console.log('Mutation: signup');
-		return this.memberService.signup(input);
+		return await this.memberService.signup(input);
 	}
 
 	@Mutation(() => Member)
 	public async login(@Args('input') input: LoginInput): Promise<Member> {
 		console.log('Mutation: login');
-		return this.memberService.login(input);
+		return await this.memberService.login(input);
 	}
+
+	// Authenticated Check
 	@UseGuards(AuthGuard)
-	@Mutation(() => String)
-	public async checkAuth(@AuthMember('memberNick') memberNick: string): Promise<String> {
-		console.log('Mutation: checkAuth');
+	@Query(() => String)
+	public checkAuth(@AuthMember('memberNick') memberNick: string): string {
+		console.log('Query: checkAuth');
+		console.log('memberNick:', memberNick);
 		return `Hi ${memberNick}`;
 	}
 
+	// Authorization Check
 	@Roles(MemberType.USER, MemberType.AGENT)
 	@UseGuards(RolesGuard)
-	@Mutation(() => String)
-	public async checkAuthRoles(@AuthMember() authMember: Member): Promise<String> {
-		console.log('Mutation: checkAuthRoles');
-		return `Hi ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id})`;
+	@Query(() => String)
+	public checkAuthRoles(@AuthMember() authMember: Member): string {
+		console.log('Query: checkAuthRoles');
+		// eslint-disable-next-line @typescript-eslint/no-base-to-string
+		return `Hi ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id.toString()})`;
 	}
 
+	// Authenticated
 	@UseGuards(AuthGuard)
 	@Mutation(() => Member)
 	public async updateMember(
 		@Args('input') input: MemberUpdate,
-		@AuthMember('_id') memberId: mongoose.ObjectId,
+		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Member> {
 		console.log('Mutation: updateMember');
-		delete (input as any)._id;
-		return this.memberService.updateMember(memberId, input);
+		delete input._id;
+		return await this.memberService.updateMember(memberId, input);
 	}
 
 	@UseGuards(WithoutGuard)
 	@Query(() => Member)
 	public async getMember(
 		@Args('memberId') input: string,
-		@AuthMember('_id') memberId: mongoose.ObjectId,
+		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Member> {
 		console.log('Query: getMember');
-		console.log('memberId:', memberId);
-
 		const targetId = shapeIntoMongoObjectId(input);
-		return this.memberService.getMember(memberId, targetId);
+		return await this.memberService.getMember(memberId, targetId);
 	}
 
 	@UseGuards(WithoutGuard)
 	@Query(() => Members)
 	public async getAgents(
 		@Args('input') input: AgentsInquiry,
-		@AuthMember('_id') memberId: mongoose.ObjectId,
+		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Members> {
 		console.log('Query: getAgents');
-		return this.memberService.getAgents(memberId, input);
+		return await this.memberService.getAgents(memberId, input);
 	}
 
 	@UseGuards(AuthGuard)
 	@Mutation(() => Member)
 	public async likeTargetMember(
 		@Args('memberId') input: string,
-		@AuthMember('_id') memberId: mongoose.ObjectId,
+		@AuthMember('_id') memberId: ObjectId,
 	): Promise<Member> {
 		console.log('Mutation: likeTargetMember');
 		const likeRefId = shapeIntoMongoObjectId(input);
 		return await this.memberService.likeTargetMember(memberId, likeRefId);
 	}
 
+	/** ADMIN => Authorization */
 
-
-	// ADMIN
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 	@Query(() => Members)
-	public async getAllMembersByAdmin(@Args('input') input: MembebrsInquiry): Promise<Members> {
+	public async getAllMembersByAdmin(
+		@Args('input') input: MembersInquiry,
+	): Promise<Members> {
+		console.log('Query: getAllMembersByAdmin');
 		return await this.memberService.getAllMembersByAdmin(input);
 	}
 
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 	@Mutation(() => Member)
-	public async updateMemberByAdmin(@Args('input') input: MemberUpdate): Promise<Member> {
-		console.log('Mutation: updateMemberByAdmin');
-
-		return await this.memberService.updateMemberByAdmin(input);
+	public async updateMembersByAdmin(@Args('input') input: MemberUpdate): Promise<Member> {
+		console.log('Mutation: updateMembersByAdmin');
+		return await this.memberService.updateMembersByAdmin(input);
 	}
 
-	/** IMAGE UPLOADER */
+	/** UPLOADER */
 
 	@UseGuards(AuthGuard)
-	@Mutation((returns) => String)
+	@Mutation(() => String)
 	public async imageUploader(
 		@Args({ name: 'file', type: () => GraphQLUpload })
-		{ createReadStream, filename, mimetype }: FileUpload,
-		@Args('target') target: String,
+		file: FileUpload,
+		@Args('target') target: string,
 	): Promise<string> {
+		const { filename, mimetype } = file;
+
 		console.log('Mutation: imageUploader');
-		console.log('received mimetype:', JSON.stringify(mimetype));
 
 		if (!filename) throw new Error(Message.UPLOAD_FAILED);
-		const ext = path.parse(filename).ext.toLowerCase();
-		const validMime = validMimeTypes.includes(mimetype) || validExtensions.includes(ext);
+		const validMime = validMimeTypes.includes(mimetype);
 		if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
 
 		const imageName = getSerialForImage(filename);
 		const url = `uploads/${target}/${imageName}`;
-		const stream = createReadStream();
+		const stream = file.createReadStream();
 
 		const result = await new Promise((resolve, reject) => {
 			stream
 				.pipe(createWriteStream(url))
-				.on('finish', async () => resolve(true))
-				.on('error', () => reject(false));
+				.on('finish', () => resolve(true))
+				.on('error', (err) =>
+					reject(err instanceof Error ? err : new Error('Stream error')),
+				);
 		});
 		if (!result) throw new Error(Message.UPLOAD_FAILED);
 
@@ -144,40 +159,44 @@ export class MemberResolver {
 	}
 
 	@UseGuards(AuthGuard)
-	@Mutation((returns) => [String])
+	@Mutation(() => [String])
 	public async imagesUploader(
 		@Args('files', { type: () => [GraphQLUpload] })
 		files: Promise<FileUpload>[],
-		@Args('target') target: String,
+		@Args('target') target: string,
 	): Promise<string[]> {
 		console.log('Mutation: imagesUploader');
 
 		const uploadedImages: string[] = [];
-		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<Promise<void>> => {
-			try {
-				const { filename, mimetype, encoding, createReadStream } = await img;
+		const promisedList = files.map(
+			async (img: Promise<FileUpload>, index: number): Promise<void> => {
+				try {
+					const uploadedFile = await img;
+					const { filename, mimetype } = uploadedFile;
 
-				const ext = path.parse(filename).ext.toLowerCase();
-				const validMime = validMimeTypes.includes(mimetype) || validExtensions.includes(ext);
-				if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
+					const validMime = validMimeTypes.includes(mimetype);
+					if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
 
-				const imageName = getSerialForImage(filename);
-				const url = `uploads/${target}/${imageName}`;
-				const stream = createReadStream();
+					const imageName = getSerialForImage(filename);
+					const url = `uploads/${target}/${imageName}`;
+					const stream = uploadedFile.createReadStream();
 
-				const result = await new Promise((resolve, reject) => {
-					stream
-						.pipe(createWriteStream(url))
-						.on('finish', () => resolve(true))
-						.on('error', () => reject(false));
-				});
-				if (!result) throw new Error(Message.UPLOAD_FAILED);
+					const result = await new Promise((resolve, reject) => {
+						stream
+							.pipe(createWriteStream(url))
+							.on('finish', () => resolve(true))
+							.on('error', (err) =>
+								reject(err instanceof Error ? err : new Error('Stream error')),
+							);
+					});
+					if (!result) throw new Error(Message.UPLOAD_FAILED);
 
-				uploadedImages[index] = url;
-			} catch (err) {
-				console.log('Error, file missing!');
-			}
-		});
+					uploadedImages[index] = url;
+				} catch (err) {
+					console.log('Error, file missing!', err);
+				}
+			},
+		);
 
 		await Promise.all(promisedList);
 		return uploadedImages;

@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { ViewGroup } from '../libs/enums/view.enum (1)';
+import { ViewGroup } from '../libs/enums/view.enum';
 
 const ViewSchema = new Schema(
 	{

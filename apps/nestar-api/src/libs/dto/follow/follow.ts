@@ -1,36 +1,36 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import * as mongoose from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { Member, TotalCounter } from '../member/member';
 import { MeLiked } from '../like/like';
 
 @ObjectType()
 export class MeFollowed {
 	@Field(() => String)
-	followingId!: mongoose.ObjectId;
+	followingId: ObjectId;
 
 	@Field(() => String)
-	followerId!: mongoose.ObjectId;
+	followerId: ObjectId;
 
 	@Field(() => Boolean)
-	myFollowing: boolean | undefined;
+	myFollowing: boolean;
 }
 
 @ObjectType()
 export class Follower {
 	@Field(() => String)
-	_id!: mongoose.ObjectId;
+	_id: ObjectId;
 
 	@Field(() => String)
-	followingId!: mongoose.ObjectId;
+	followingId: ObjectId;
 
 	@Field(() => String)
-	followerId!: mongoose.ObjectId;
+	followerId: ObjectId;
 
 	@Field(() => Date)
-	createdAt: Date | undefined;
+	createdAt: Date;
 
 	@Field(() => Date)
-	updatedAt: Date | undefined;
+	updatedAt: Date;
 
 	/** from aggregation **/
 
@@ -47,19 +47,19 @@ export class Follower {
 @ObjectType()
 export class Following {
 	@Field(() => String)
-	_id!: mongoose.ObjectId;
+	_id: ObjectId;
 
 	@Field(() => String)
-	followingId!: mongoose.ObjectId;
+	followingId: ObjectId;
 
 	@Field(() => String)
-	followerId!: mongoose.ObjectId;
+	followerId: ObjectId;
 
 	@Field(() => Date)
-	createdAt: Date | undefined;
+	createdAt: Date;
 
 	@Field(() => Date)
-	updatedAt: Date | undefined;
+	updatedAt: Date;
 
 	/** from aggregation **/
 
@@ -76,17 +76,17 @@ export class Following {
 @ObjectType()
 export class Followings {
 	@Field(() => [Following])
-	list: Following[] | undefined;
+	list: Following[];
 
 	@Field(() => [TotalCounter], { nullable: true })
-	metaCounter: TotalCounter[] | undefined;
+	metaCounter: TotalCounter[];
 }
 
 @ObjectType()
 export class Followers {
 	@Field(() => [Follower])
-	list: Follower[] | undefined;
+	list: Follower[];
 
 	@Field(() => [TotalCounter], { nullable: true })
-	metaCounter: TotalCounter[] | undefined;
+	metaCounter: TotalCounter[];
 }

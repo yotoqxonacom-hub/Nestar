@@ -14,10 +14,9 @@ import { LikeModule } from '../like/like.module';
 		AuthModule,
 		ViewModule,
 		MemberModule,
-		LikeModule, // LikeService shu moduldan import qilinadi
-		// MemberService shu moduldan export qilinadi
+		LikeModule,
 	],
 	providers: [PropertyResolver, PropertyService],
-	exports: [PropertyService], // PropertyService ni boshqa modullarda ishlatish uchun export qilinadi
+	exports: [PropertyService],
 })
-export class PropertyModule { }
+export class PropertyModule {}

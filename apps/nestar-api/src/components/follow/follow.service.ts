@@ -1,72 +1,62 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import FollowSchema from '../../schemas/Follow.model';
+import { Model, ObjectId } from 'mongoose';
 import { Follower, Followers, Following, Followings } from '../../libs/dto/follow/follow';
-import mongoose, { Model, ObjectId, Types } from 'mongoose';
 import { MemberService } from '../member/member.service';
 import { Direction, Message } from '../../libs/enums/common.enum';
-import { lookupFollowingData, lookupFollowerData, lookUpAuthMemberLiked, lookupAuthMemberFollowed } from '../../libs/config';
 import { FollowInquiry } from '../../libs/dto/follow/follow.input';
 import { T } from '../../libs/types/common';
+import {
+	lookupAuthMemberFollowed,
+	lookupAuthMemberLiked,
+	lookupFollowerData,
+	lookupFollowingData,
+} from '../../libs/config';
 
 @Injectable()
 export class FollowService {
 	constructor(
 		@InjectModel('Follow') private readonly followModel: Model<Follower | Following>,
 		private readonly memberService: MemberService,
-	) { }
+	) {}
 
-	public async subscribe(
-		followerId: Types.ObjectId,
-		followingId: Types.ObjectId,
-	): Promise<Follower> {
-
+	public async subscribe(followerId: ObjectId, followingId: ObjectId): Promise<Follower> {
+		// eslint-disable-next-line @typescript-eslint/no-base-to-string
 		if (followerId.toString() === followingId.toString()) {
-			throw new InternalServerErrorException(
-				Message.SELF_SUBSCRIPTION_DENIED,
-			);
+			throw new InternalServerErrorException(Message.SELF_SUBSCRIPTION_DENIED);
 		}
 
-		const targetMember = await this.memberService.getMember(
-			null as any,
-			followingId as any,
-		);
+		const targetMember = await this.memberService.getMember(null, followingId);
+		if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-		if (!targetMember) {
-			throw new InternalServerErrorException(
-				Message.NO_DATA_FOUND,
-			);
-		}
-
-		const result = await this.registerSubscription(
-			followerId,
-			followingId,
-		);
+		const result = await this.registerSubscription(followerId, followingId);
 
 		await this.memberService.memberStatsEditor({
-			_id: followerId as any,
+			_id: followerId,
 			targetKey: 'memberFollowings',
 			modifier: 1,
 		});
-
 		await this.memberService.memberStatsEditor({
-			_id: followingId as any,
+			_id: followingId,
 			targetKey: 'memberFollowers',
 			modifier: 1,
 		});
 
-		return result as any;
+		return result;
 	}
 
-
 	private async registerSubscription(
-		followerId: Types.ObjectId,
-		followingId: Types.ObjectId,
+		followerId: ObjectId,
+		followingId: ObjectId,
 	): Promise<Follower> {
 		try {
 			return await this.followModel.create({
-				followingId,
-				followerId,
+				followingId: followingId,
+				followerId: followerId,
 			});
 		} catch (err) {
 			console.log('Error, Service.model:', err instanceof Error ? err.message : err);
@@ -74,40 +64,60 @@ export class FollowService {
 		}
 	}
 
-
-	public async unsubscribe(followerId: Types.ObjectId, followingId: Types.ObjectId): Promise<Follower> {
-		const targetMember = await this.memberService.getMember(null as any, followingId as any);
+	public async unsubscribe(
+		followerId: ObjectId,
+		followingId: ObjectId,
+	): Promise<Follower> {
+		const targetMember = await this.memberService.getMember(null, followingId);
 		if (!targetMember) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-		const result = await this.followModel.findOneAndDelete({
-			followingId: followingId,
-			followerId: followerId,
-		});
+		const result = await this.followModel
+			.findOneAndDelete({
+				followingId: followingId,
+				followerId: followerId,
+			})
+			.exec();
 		if (!result) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-		await this.memberService.memberStatsEditor({ _id: followerId as any, targetKey: 'memberFollowings', modifier: -1 });
-		await this.memberService.memberStatsEditor({ _id: followingId as any, targetKey: 'memberFollowers', modifier: -1 });
+		await this.memberService.memberStatsEditor({
+			_id: followerId,
+			targetKey: 'memberFollowings',
+			modifier: -1,
+		});
+		await this.memberService.memberStatsEditor({
+			_id: followingId,
+			targetKey: 'memberFollowers',
+			modifier: -1,
+		});
 
 		return result;
 	}
 
-	public async getMemberFollowings(memberId: Types.ObjectId, input: FollowInquiry): Promise<Followings> {
+	public async getMemberFollowings(
+		memberId: ObjectId,
+		input: FollowInquiry,
+	): Promise<Followings> {
 		const { page, limit, search } = input;
 		if (!search?.followerId) throw new InternalServerErrorException(Message.BAD_REQUEST);
 		const match: T = { followerId: search?.followerId };
 		console.log('match:', match);
 
-		const result = await this.followModel
+		const result: Followings[] = await this.followModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: { createdAt: Direction.DESC } },
 				{
 					$facet: {
 						list: [
-							{ $skip: ((page ?? 1) - 1) * (limit ?? 10) },
-							{ $limit: limit ?? 10 },
-							lookUpAuthMemberLiked(memberId, "$followingId") as mongoose.PipelineStage.Lookup,
-							lookupAuthMemberFollowed({ followerId: memberId, followingId: "$followingId" }) as mongoose.PipelineStage.Lookup,
+							{ $skip: (page - 1) * limit },
+							{ $limit: limit },
+							// meLiked
+							lookupAuthMemberLiked(memberId, '$followingId'),
+							// meFollowed
+							lookupAuthMemberFollowed({
+								followerId: memberId,
+								followingId: '$followingId',
+							}),
 							lookupFollowingData,
 							{ $unwind: '$followingData' },
 						],
@@ -118,28 +128,35 @@ export class FollowService {
 			.exec();
 
 		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
-
 		return result[0];
 	}
 
-	public async getMemberFollowers(memberId: Types.ObjectId, input: FollowInquiry): Promise<Followers> {
+	public async getMemberFollowers(
+		memberId: ObjectId,
+		input: FollowInquiry,
+	): Promise<Followers> {
 		const { page, limit, search } = input;
 		if (!search?.followingId) throw new InternalServerErrorException(Message.BAD_REQUEST);
 
 		const match: T = { followingId: search?.followingId };
 		console.log('match:', match);
 
-		const result = await this.followModel
+		const result: Followers[] = await this.followModel
 			.aggregate([
 				{ $match: match },
 				{ $sort: { createdAt: Direction.DESC } },
 				{
 					$facet: {
 						list: [
-							{ $skip: ((page ?? 1) - 1) * (limit ?? 10) },
-							{ $limit: limit ?? 10 },
-							lookUpAuthMemberLiked(memberId, "$followerId") as mongoose.PipelineStage.Lookup,
+							{ $skip: (page - 1) * limit },
+							{ $limit: limit },
+							// meLiked
+							lookupAuthMemberLiked(memberId, '$followerId'),
 							// meFollowed
+							lookupAuthMemberFollowed({
+								followerId: memberId,
+								followingId: '$followerId',
+							}),
 							lookupFollowerData,
 							{ $unwind: '$followerData' },
 						],
@@ -148,7 +165,6 @@ export class FollowService {
 				},
 			])
 			.exec();
-
 		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
 		return result[0];

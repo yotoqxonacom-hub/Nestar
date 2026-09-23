@@ -1,85 +1,89 @@
-import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { type ObjectId } from 'mongoose';
-import { PropertyLocation, PropertyStatus, PropertyType } from '../../enums/property.enum (1)';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { ObjectId } from 'mongoose';
+import {
+	PropertyLocation,
+	PropertyStatus,
+	PropertyType,
+} from '../../enums/property.enum';
 import { Member, TotalCounter } from '../member/member';
 import { MeLiked } from '../like/like';
-import { IsNotEmpty, Min } from 'class-validator';
 
 @ObjectType()
 export class Property {
 	@Field(() => String)
-	_id: ObjectId | undefined;
+	_id: ObjectId;
 
 	@Field(() => PropertyType)
-	propertyType: PropertyType | undefined;
+	propertyType: PropertyType;
 
 	@Field(() => PropertyStatus)
-	propertyStatus: PropertyStatus | undefined;
+	propertyStatus: PropertyStatus;
 
 	@Field(() => PropertyLocation)
-	propertyLocation: PropertyLocation | undefined;
+	propertyLocation: PropertyLocation;
 
 	@Field(() => String)
-	propertyAddress: string | undefined;
+	propertyAddress: string;
 
 	@Field(() => String)
-	propertyTitle: string | undefined;
+	propertyTitle: string;
 
 	@Field(() => Number)
-	propertyPrice: number | undefined;
+	propertyPrice: number;
 
 	@Field(() => Number)
-	propertySquare: number | undefined;
+	propertySquare: number;
 
 	@Field(() => Int)
-	propertyBeds: number | undefined;
+	propertyBeds: number;
 
 	@Field(() => Int)
-	propertyRooms: number | undefined;
+	propertyRooms: number;
 
 	@Field(() => Int)
-	propertyViews: number | undefined;
+	propertyViews: number;
 
 	@Field(() => Int)
-	propertyLikes: number | undefined;
+	propertyLikes: number;
 
 	@Field(() => Int)
-	propertyComments: number | undefined;
+	propertyComments: number;
 
 	@Field(() => Int)
-	propertyRank: number | undefined;
+	propertyRank: number;
 
 	@Field(() => [String])
-	propertyImages: string[] | undefined;
+	propertyImages: string[];
 
 	@Field(() => String, { nullable: true })
 	propertyDesc?: string;
 
 	@Field(() => Boolean)
-	propertyBarter: boolean | undefined;
+	propertyBarter: boolean;
 
 	@Field(() => Boolean)
-	propertyRent: boolean | undefined;
+	propertyRent: boolean;
 
 	@Field(() => String)
-	memberId: ObjectId | undefined;
+	memberId: ObjectId;
 
-
+	@Field(() => Date, { nullable: true })
 	soldAt?: Date;
 
+	@Field(() => Date, { nullable: true })
 	deletedAt?: Date;
 
 	@Field(() => Date, { nullable: true })
 	constructedAt?: Date;
 
 	@Field(() => Date)
-	createdAt: Date | undefined;
+	createdAt: Date;
 
 	@Field(() => Date)
-	updatedAt: Date | undefined;
+	updatedAt: Date;
 
+	/** from aggregation */
 
-	/** from aggrigation**/
 	@Field(() => Member, { nullable: true })
 	memberData?: Member;
 
@@ -90,23 +94,8 @@ export class Property {
 @ObjectType()
 export class Properties {
 	@Field(() => [Property])
-	list: Property[] | undefined;
+	list: Property[];
 
-	@Field(() => TotalCounter, { nullable: true })
-	metaCounter: TotalCounter[] | undefined;
+	@Field(() => [TotalCounter], { nullable: true })
+	metaCounter: TotalCounter[];
 }
-
-@InputType()
-export class OrdinaryInquiry {
-	@IsNotEmpty()
-	@Min(1)
-	@Field(() => Int)
-	page!: number;
-
-	@IsNotEmpty()
-	@Min(1)
-	@Field(() => Int)
-	limit!: number;
-}
-
-

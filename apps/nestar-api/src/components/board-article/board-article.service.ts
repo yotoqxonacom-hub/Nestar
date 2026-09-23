@@ -1,307 +1,274 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import mongoose, { Model, ObjectId } from 'mongoose';
-import { MemberService } from '../member/member.service';
-import { ViewService } from '../view/view.service';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import BoardArticles, { BoardArticle } from '../../libs/dto/board-articles/board-article (1)';
+import { Model, ObjectId } from 'mongoose';
+import {
+	AllBoardArticlesInquiry,
+	BoardArticleInput,
+	BoardArticlesInquiry,
+} from '../../libs/dto/board-article/board-article.input';
+import { BoardArticle, BoardArticles } from '../../libs/dto/board-article/board-article';
 import { Direction, Message } from '../../libs/enums/common.enum';
-import { BoardArticleStatus } from '../../libs/enums/board-article.enum (1)';
+import { MemberService } from '../member/member.service';
+import { BoardArticleStatus } from '../../libs/enums/board-article.enum';
 import { StatisticModifier, T } from '../../libs/types/common';
-import { ViewGroup } from '../../libs/enums/view.enum (1)';
-import { BoardArticleUpdate } from '../../libs/dto/board-articles/board-article.update (1)';
-import { AllBoardArticlesInquiry, BoardArticlesInquiry } from '../../libs/dto/board-articles/board-article.input (1)';
-import { lookUpAuthMemberLiked, lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
+import { ViewGroup } from '../../libs/enums/view.enum';
+import { ViewService } from '../view/view.service';
+import { BoardArticleUpdate } from '../../libs/dto/board-article/board-article.update';
+import {
+	lookupAuthMemberLiked,
+	lookupMember,
+	shapeIntoMongoObjectId,
+} from '../../libs/config';
 import { LikeService } from '../like/like.service';
 import { LikeInput } from '../../libs/dto/like/like.input';
-import { LikeGroup } from '../../libs/enums/like.enum (1)';
+import { LikeGroup } from '../../libs/enums/like.enum';
 
 @Injectable()
 export class BoardArticleService {
-    constructor(@InjectModel('BoardArticle') private readonly boardArticleModel: Model<BoardArticle>,
-        private memberService: MemberService,
-        private viewService: ViewService,
-        private likeService: LikeService
-    ) { }
+	constructor(
+		@InjectModel('BoardArticle') private readonly boardArticleModel: Model<BoardArticle>,
+		private readonly memberService: MemberService,
+		private readonly viewService: ViewService,
+		private likeService: LikeService,
+	) {}
 
-    public async createBoardArticle(memberId: any, input: any): Promise<BoardArticle> {
-        input.memberId = memberId;
-        try {
-            const result = await this.boardArticleModel.create(input);
-            await this.memberService.memberStatsEditor({
-                _id: memberId,
-                targetKey: "memberArticles",
-                modifier: 1
-            });
-            return result as unknown as BoardArticle;
-        } catch (err) {
-            console.log(
-                "Error on serviceModel while createBoardArticle:",
-                err instanceof Error ? err.message : String(err));
-            throw new BadRequestException(Message.CREATE_FAILED);
-        }
-    }
+	public async createBoardArticle(
+		memberId: ObjectId,
+		input: BoardArticleInput,
+	): Promise<BoardArticle> {
+		input.memberId = memberId;
+		try {
+			const result = await this.boardArticleModel.create(input);
+			await this.memberService.memberStatsEditor({
+				_id: memberId,
+				targetKey: 'memberArticles',
+				modifier: 1,
+			});
 
+			return result;
+		} catch (err) {
+			console.log('Error, Service.model:', err);
+			throw new BadRequestException(Message.CREATE_FAILED);
+		}
+	}
 
-    public async getBoardArticle(memberId: ObjectId, articleId: ObjectId): Promise<BoardArticle> {
-        const search: T = {
-            _id: articleId,
-            articleStatus: BoardArticleStatus.ACTIVE,
-        };
+	public async getBoardArticle(
+		memberId: ObjectId,
+		articleId: ObjectId,
+	): Promise<BoardArticle> {
+		const search: T = {
+			_id: articleId,
+			articleStatus: BoardArticleStatus.ACTIVE,
+		};
 
-        const targetBoardArticle: BoardArticle | null = await this.boardArticleModel.findOne(search).lean().exec();
-        if (!targetBoardArticle) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		const targetBoardArticle: BoardArticle | null = await this.boardArticleModel
+			.findOne(search)
+			.lean()
+			.exec();
+		if (!targetBoardArticle)
+			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-        if (memberId) {
-            const viewInput = { memberId: memberId, viewRefId: articleId, viewGroup: ViewGroup.ARTICLE };
-            const newView = await this.viewService.recordView(viewInput);
-            console.log("VIEW INPUT:", viewInput);
-            console.log("NEW VIEW:", newView);
+		if (memberId) {
+			const viewInput = {
+				memberId: memberId,
+				viewRefId: articleId,
+				viewGroup: ViewGroup.ARTICLE,
+			};
+			const newView = await this.viewService.recordView(viewInput);
+			if (newView) {
+				await this.boardArticleStatsEditor({
+					_id: articleId,
+					targetKey: 'articleViews',
+					modifier: 1,
+				});
+				targetBoardArticle.articleViews++;
+			}
+			// meLiked
+			const likeInput = {
+				memberId: memberId,
+				likeRefId: articleId,
+				likeGroup: LikeGroup.ARTICLE,
+			};
+			targetBoardArticle.meLiked = await this.likeService.checkLikeExistence(likeInput);
+		}
 
-            if (newView) {
-                await this.boardArticleStatsEditor({ _id: articleId, targetKey: 'articleViews', modifier: 1 });
-                if (targetBoardArticle.articleViews !== undefined) {
-                    targetBoardArticle.articleViews++;
-                }
-            }
-            const likeInput: LikeInput = { memberId, likeRefId: articleId, likeGroup: LikeGroup.ARTICLE };
-            targetBoardArticle.meLiked = await this.likeService.checkLikeExistance(likeInput) as unknown as typeof targetBoardArticle.meLiked;
-        }
+		targetBoardArticle.memberData = await this.memberService.getMember(
+			null,
+			targetBoardArticle.memberId,
+		);
+		return targetBoardArticle;
+	}
 
-        if (targetBoardArticle.memberId) {
-            targetBoardArticle.memberData = await this.memberService.getMember(null as any, targetBoardArticle.memberId);
-        }
-        return targetBoardArticle;
-    }
+	public async updateBoardArticle(
+		memberId: ObjectId,
+		input: BoardArticleUpdate,
+	): Promise<BoardArticle> {
+		const { _id, articleStatus } = input;
 
+		const result = await this.boardArticleModel
+			.findOneAndUpdate(
+				{ _id: _id, memberId: memberId, articleStatus: BoardArticleStatus.ACTIVE },
+				input,
+				{
+					new: true,
+				},
+			)
+			.exec();
 
-    public async updateBoardArticle(memberId: ObjectId, input: BoardArticleUpdate): Promise<BoardArticle> {
-        const { _id, articleStatus } = input;
+		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
 
-        const result = await this.boardArticleModel
-            .findOneAndUpdate({ _id: _id, memberId: memberId, articleStatus: BoardArticleStatus.ACTIVE }, input, {
-                new: true,
-            })
-            .exec();
+		if (articleStatus === BoardArticleStatus.DELETE) {
+			await this.memberService.memberStatsEditor({
+				_id: memberId,
+				targetKey: 'memberArticles',
+				modifier: -1,
+			});
+		}
 
-        if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
+		return result;
+	}
 
-        if (articleStatus === BoardArticleStatus.DELETE) {
-            await this.memberService.memberStatsEditor({
-                _id: memberId,
-                targetKey: 'memberArticles',
-                modifier: -1,
-            });
-        }
+	public async getBoardArticles(
+		memberId: ObjectId,
+		input: BoardArticlesInquiry,
+	): Promise<BoardArticles> {
+		const { articleCategory, text } = input.search;
+		const match: T = { articleStatus: BoardArticleStatus.ACTIVE };
+		const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
-        return result;
-    }
+		if (articleCategory) match.articleCategory = articleCategory;
+		if (text) match.articleTitle = { $regex: new RegExp(text, 'i') };
+		if (input.search?.memberId) {
+			match.memberId = shapeIntoMongoObjectId(input.search.memberId);
+		}
+		console.log('match:', match);
 
+		const result: BoardArticles[] = await this.boardArticleModel
+			.aggregate([
+				{ $match: match },
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [
+							{ $skip: (input.page - 1) * input.limit },
+							{ $limit: input.limit },
+							// meLiked
+							lookupAuthMemberLiked(memberId),
+							lookupMember,
+							{ $unwind: '$memberData' },
+						],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-    public async getBoardArticles(
-        memberId: ObjectId,
-        input: BoardArticlesInquiry,
-    ): Promise<BoardArticles> {
+		return result[0];
+	}
 
-        const { articleCategory, text } = input.search ?? {};
+	public async likeTargetBoardArticle(
+		memberId: ObjectId,
+		likeRefId: ObjectId,
+	): Promise<BoardArticle> {
+		const target: BoardArticle | null = await this.boardArticleModel
+			.findOne({ _id: likeRefId, articleStatus: BoardArticleStatus.ACTIVE })
+			.exec();
+		if (!target) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-        const match: T = {
-            articleStatus: BoardArticleStatus.ACTIVE,
-        };
+		const input: LikeInput = {
+			memberId: memberId,
+			likeRefId: likeRefId,
+			likeGroup: LikeGroup.ARTICLE,
+		};
 
-        const sort: T = {
-            [input.sort ?? "createdAt"]:
-                input?.direction ?? Direction.DESC,
-        };
+		// LIKE TOGGLE via Like modules
+		const modifier: number = await this.likeService.toggleLike(input);
+		const result = await this.boardArticleStatsEditor({
+			_id: likeRefId,
+			targetKey: 'articleLikes',
+			modifier: modifier,
+		});
 
-        if (articleCategory) {
-            match.articleCategory = articleCategory;
-        }
+		if (!result) throw new InternalServerErrorException(Message.SOMETHING_WENT_WRONG);
+		return result;
+	}
 
-        if (text) {
-            match.articleTitle = {
-                $regex: new RegExp(text, "i"),
-            };
-        }
+	public async getAllBoardArticlesByAdmin(
+		input: AllBoardArticlesInquiry,
+	): Promise<BoardArticles> {
+		const { articleStatus, articleCategory } = input.search;
+		const match: T = {};
+		const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
 
-        if (input.search?.memberId) {
-            match.memberId = shapeIntoMongoObjectId(
-                input.search.memberId,
-            );
-        }
+		if (articleStatus) match.articleStatus = articleStatus;
+		if (articleCategory) match.articleCategory = articleCategory;
 
-        console.log("match:", match);
-        console.log("========== LIKE DEBUG ==========");
-        console.log("memberId:", memberId);
-        console.log("memberId type:", typeof memberId);
-        console.log("================================");
+		const result: BoardArticles[] = await this.boardArticleModel
+			.aggregate([
+				{ $match: match },
+				{ $sort: sort },
+				{
+					$facet: {
+						list: [
+							{ $skip: (input.page - 1) * input.limit },
+							{ $limit: input.limit },
+							lookupMember,
+							{ $unwind: '$memberData' },
+						],
+						metaCounter: [{ $count: 'total' }],
+					},
+				},
+			])
+			.exec();
+		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
-        const result = await this.boardArticleModel
-            .aggregate([
-                { $match: match },
+		return result[0];
+	}
 
-                { $sort: sort },
+	public async updateBoardArticleByAdmin(
+		input: BoardArticleUpdate,
+	): Promise<BoardArticle> {
+		const { _id, articleStatus } = input;
 
-                {
-                    $facet: {
-                        list: [
-                            {
-                                $skip:
-                                    ((input.page ?? 1) - 1) *
-                                    (input.limit ?? 10),
-                            },
-                            {
-                                $limit: input.limit ?? 10,
-                            },
-                            lookUpAuthMemberLiked(memberId) as mongoose.PipelineStage.Lookup,
-                        ],
+		const result = await this.boardArticleModel
+			.findOneAndUpdate({ _id: _id, articleStatus: BoardArticleStatus.ACTIVE }, input, {
+				new: true,
+			})
+			.exec();
+		if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
 
-                        metaCounter: [
-                            {
-                                $count: "total",
-                            },
-                        ],
-                    },
-                },
-            ])
-            .exec();
+		if (articleStatus === BoardArticleStatus.DELETE) {
+			await this.memberService.memberStatsEditor({
+				_id: result.memberId,
+				targetKey: 'memberArticles',
+				modifier: -1,
+			});
+		}
 
-        if (!result.length) {
-            throw new InternalServerErrorException(
-                Message.NO_DATA_FOUND,
-            );
-        }
+		return result;
+	}
 
-        const data = result[0];
+	public async removeBoardArticleByAdmin(articleId: ObjectId): Promise<BoardArticle> {
+		const search: T = { _id: articleId, articleStatus: BoardArticleStatus.DELETE };
 
-        const total = data.metaCounter[0]?.total ?? 0;
+		const result = await this.boardArticleModel.findOneAndDelete(search).exec();
 
-        return {
-            ...data,
-            metaCounter: [{ total }],
-        };
-    }
+		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
 
+		return result;
+	}
 
-
-    public async likeTargetBoardArticle(
-        memberId: mongoose.ObjectId,
-        likeRefId: mongoose.ObjectId,
-    ): Promise<BoardArticle | null> {
-
-        const target = await this.boardArticleModel.findOne({
-            _id: likeRefId,
-            articleStatus: BoardArticleStatus.ACTIVE,
-        });
-
-        if (!target) {
-            throw new InternalServerErrorException('NO_DATA_FOUND');
-        }
-
-        const input: LikeInput = {
-            memberId: memberId,
-            likeRefId: likeRefId,
-            likeGroup: LikeGroup.ARTICLE,
-        };
-
-        const modifier: number = await this.likeService.toggleLike(input);
-
-        const result = await this.boardArticleStatsEditor({
-            _id: likeRefId,
-            targetKey: 'articleLikes',
-            modifier,
-        });
-
-        if (!result) {
-            throw new InternalServerErrorException('SOMETHING_WENT_WRONG');
-        }
-
-        return result;
-    }
-
-
-
-
-    /** ADMIN **/
-    public async getAllBoardArticlesByAdmin(input: AllBoardArticlesInquiry): Promise<BoardArticles> {
-        const { articleStatus, articleCategory } = input.search ?? {};
-        const match: T = {};
-        const sort: T = { [input.sort ?? "createdAt"]: input?.direction ?? Direction.DESC };
-
-        if (articleStatus) match.articleStatus = articleStatus;
-        if (articleCategory) match.articleCategory = articleCategory;
-
-        const result = await this.boardArticleModel.aggregate([
-            { $match: match },
-            { $sort: sort },
-            {
-                $facet: {
-                    list: [
-                        { $skip: ((input.page ?? 1) - 1) * (input.limit ?? 10) },
-                        { $limit: input.limit ?? 10 },
-                        lookupMember,
-                        { $unwind: "$memberData" },
-                    ],
-                    metaCounter: [
-                        { $count: "total" }
-                    ]
-                },
-            },
-        ]).exec();
-
-        if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
-        const data = result[0];
-
-        const total = data.metaCounter[0]?.total ?? 0;
-
-        return {
-            ...data,
-            metaCounter: [{ total }],
-        };
-    }
-
-
-    public async updateBoardArticleByAdmin(input: BoardArticleUpdate): Promise<BoardArticle> {
-        const { _id, articleStatus } = input;
-
-        const result = await this.boardArticleModel
-            .findOneAndUpdate({ _id: _id, articleStatus: BoardArticleStatus.ACTIVE }, input, {
-                new: true,
-            })
-            .exec();
-        if (!result) throw new InternalServerErrorException(Message.UPDATE_FAILED);
-
-        if (articleStatus === BoardArticleStatus.DELETE && result.memberId) {
-            await this.memberService.memberStatsEditor({
-                _id: result.memberId,
-                targetKey: 'memberArticles',
-                modifier: -1,
-            });
-        }
-
-        return result;
-    }
-
-    public async removeBoardArticleByAdmin(articleId: ObjectId): Promise<BoardArticle> {
-        const search: T = { _id: articleId, articleStatus: BoardArticleStatus.DELETE };
-        const result = await this.boardArticleModel.findOneAndDelete(search).exec();
-        if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
-
-        return result;
-    }
-
-
-
-
-
-    public async boardArticleStatsEditor(input: StatisticModifier): Promise<BoardArticle | null> {
-        const { _id, targetKey, modifier } = input;
-        return await this.boardArticleModel
-            .findByIdAndUpdate(
-                _id,
-                { $inc: { [targetKey]: modifier } },
-                { new: true },
-            )
-            .exec();
-    }
-
+	public async boardArticleStatsEditor(
+		input: StatisticModifier,
+	): Promise<BoardArticle | null> {
+		const { _id, targetKey, modifier } = input;
+		return await this.boardArticleModel
+			.findByIdAndUpdate(_id, { $inc: { [targetKey]: modifier } }, { new: true })
+			.exec();
+	}
 }

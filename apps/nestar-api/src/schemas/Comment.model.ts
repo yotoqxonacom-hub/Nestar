@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { CommentGroup, CommentStatus } from '../libs/enums/comment.enum (1)';
+import { CommentGroup, CommentStatus } from '../libs/enums/comment.enum';
 
 const CommentSchema = new Schema(
 	{

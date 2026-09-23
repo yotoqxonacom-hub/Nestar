@@ -1,28 +1,24 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
-import * as mongoose from "mongoose";
-import { ViewGroup } from "../../enums/view.enum (1)";
-
-
-
+import { Field, ObjectType } from '@nestjs/graphql';
+import { ObjectId } from 'mongoose';
+import { ViewGroup } from '../../enums/view.enum';
 
 @ObjectType()
 export class View {
-    @Field(() => String)
-    _id: mongoose.ObjectId | undefined;
+	@Field(() => String)
+	_id: ObjectId;
 
-    @Field(() => ViewGroup)
-    viewGroup: ViewGroup | undefined
+	@Field(() => ViewGroup)
+	viewGroup: ViewGroup;
 
-    @Field(() => String)
-    viewRefId: mongoose.ObjectId | undefined
+	@Field(() => String)
+	viewRefId: ObjectId;
 
-    @Field(() => String)
-    memberId: mongoose.ObjectId | undefined
+	@Field(() => String)
+	memberId: ObjectId;
 
-    @Field(() => Date)
-    createdAt?: Date | undefined
+	@Field(() => Date)
+	createdAt: Date;
 
-    @Field(() => Date)
-    updatedAt?: Date | undefined
-
+	@Field(() => Date)
+	updatedAt: Date;
 }
