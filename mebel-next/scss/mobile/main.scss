@@ -1696,7 +1696,8 @@
 	.sheet-apply {
 		position: sticky;
 		bottom: 0;
+		flex-shrink: 0;
 		width: 100%;
-		height: 52px;
+		min-height: 52px;
 	}
 }
