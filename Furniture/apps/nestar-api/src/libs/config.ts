@@ -13,7 +13,7 @@ export const availableMemberSorts = [
 	'memberLikes',
 	'memberViews',
 ];
-export const availableOptions = ['productBarter', 'productRent'];
+export const availableOptions = ['productBarter'];
 export const availableBoardArticleSorts = [
 	'createdAt',
 	'updatedAt',

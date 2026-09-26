@@ -62,10 +62,6 @@ export class ProductInput {
 	@Field(() => Boolean, { nullable: true })
 	productBarter?: boolean;
 
-	@IsOptional()
-	@Field(() => Boolean, { nullable: true })
-	productRent?: boolean;
-
 	memberId?: ObjectId;
 
 	@IsOptional()

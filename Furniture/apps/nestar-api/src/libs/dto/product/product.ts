@@ -61,9 +61,6 @@ export class Product {
 	@Field(() => Boolean)
 	productBarter: boolean;
 
-	@Field(() => Boolean)
-	productRent: boolean;
-
 	@Field(() => String)
 	memberId: ObjectId;
 
