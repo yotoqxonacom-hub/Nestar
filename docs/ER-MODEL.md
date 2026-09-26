@@ -1,7 +1,7 @@
 # Yumshoq Mebel Do'koni — ER Model
 
 Bu model **Nestar** loyihasi arxitekturasi asosida tuzilgan (NestJS + GraphQL + MongoDB/Mongoose).
-Nestar'dagi entitylar tuzilishi, nomlash uslubi (`propertyTitle` → `productTitle`), polimorf
+Nestar'dagi entitylar tuzilishi, nomlash uslubi (`propertyTitle` → `productName`), polimorf
 `*RefId + *Group` bog'lanishlar va aggregatsiya hisoblagichlari (`*Views`, `*Likes`, `*Comments`)
 o'zgarmagan holda saqlandi. `Property` o'rnini `Product` (yumshoq mebel) egalladi, do'kon uchun esa
 `Order` va `OrderItem` qo'shildi.
@@ -30,6 +30,12 @@ o'zgarmagan holda saqlandi. `Property` o'rnini `Product` (yumshoq mebel) egallad
 | —                       | **`OrderItem`** (yangi)  | Buyurtmadagi mahsulotlar                        |
 
 ## 2. ER diagramma
+
+![ER diagramma](./er-diagram.png)
+
+Interaktiv versiya: [`er-diagram.html`](./er-diagram.html)
+
+### Mermaid versiyasi
 
 ```mermaid
 erDiagram
@@ -92,10 +98,10 @@ erDiagram
         ProductLocation productLocation
         ProductMaterial productMaterial
         string productColor
-        string productTitle
+        string productName
         number productPrice
         number productDiscount
-        int productStock
+        int productLeftCount
         int productSeats
         int productWidth
         int productDepth
@@ -301,7 +307,7 @@ memberPhone: { unique: true }
 
 // ProductSchema — bir xil mahsulot ikki marta joylanmasligi uchun (Nestar'dagi kabi)
 ProductSchema.index(
-  { productType: 1, productLocation: 1, productTitle: 1, productPrice: 1 },
+  { productType: 1, productLocation: 1, productName: 1, productPrice: 1 },
   { unique: true },
 );
 
@@ -322,7 +328,7 @@ OrderItemSchema.index({ orderId: 1, productId: 1 }, { unique: true });
 - Buyurtma yaratilganda `OrderItem.itemPrice` o'sha paytdagi `productPrice` (chegirma bilan)
   qiymatida saqlanadi — keyinchalik narx o'zgarsa ham buyurtma summasi o'zgarmaydi.
 - `orderTotal = Σ(itemQuantity × itemPrice) + orderDelivery`.
-- Buyurtma `PROCESS` holatiga o'tganda `productStock` kamayadi; `0` bo'lsa
+- Buyurtma `PROCESS` holatiga o'tganda `productLeftCount` kamayadi; `0` bo'lsa
   `productStatus = SOLD` va `soldAt` belgilanadi.
 - `productViews`, `productLikes`, `productComments`, `memberFollowers` va h.k. —
   Nestar'dagi kabi `$inc` orqali yangilanadigan denormalizatsiyalangan hisoblagichlar.
