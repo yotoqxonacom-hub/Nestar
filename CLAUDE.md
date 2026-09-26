@@ -1,7 +1,7 @@
 # Nestar Furniture — loyiha eslatmasi
 
 Bu branch (`claude/furniture-store-er-model-ezqtk7`) yumshoq mebel do'koni ishlarini saqlaydi.
-`master` va `develop` (asl Nestar kodi) o'zgartirilmagan. Snapshot tegi: `furniture-snapshot-2026-09-26`.
+`master` va `develop` (asl Nestar kodi) o'zgartirilmagan. 26-sentabr 2026 holati: `59fa9d8` commiti (dizayn + backend + ER model).
 
 ## Asosiy natijalar (oxirgi versiyalar)
 
