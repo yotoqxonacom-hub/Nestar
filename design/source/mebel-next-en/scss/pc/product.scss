@@ -1,0 +1,580 @@
+/** PC: katalog va mahsulot sahifasi **/
+#pc-wrap {
+	.product-page {
+		background: $bg-soft;
+		padding: 50px 0 90px;
+		.container {
+			gap: 30px;
+			align-items: flex-start;
+		}
+		.left-config {
+			width: 300px;
+			flex-shrink: 0;
+			position: sticky;
+			top: 90px;
+		}
+		.main-config {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+		.list-top {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			.found {
+				font-size: 15px;
+				color: $grey;
+				b {
+					color: $dark;
+				}
+			}
+		}
+		.sort {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: $grey;
+			select {
+				height: 40px;
+				padding: 0 12px;
+				border-radius: 8px;
+				border: 1px solid $line;
+				background: $white;
+				font-weight: 600;
+				outline: none;
+				cursor: pointer;
+			}
+		}
+		.active-chips {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			button {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				height: 34px;
+				padding: 0 12px;
+				border-radius: 17px;
+				border: 1px solid $dark;
+				background: $white;
+				font-size: 13px;
+				svg {
+					font-size: 15px;
+				}
+				&.clear {
+					border-color: transparent;
+					background: none;
+					color: $accent;
+					font-weight: 500;
+				}
+			}
+		}
+		.product-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 24px;
+			.product-card {
+				width: 100%;
+			}
+		}
+		.pagination-config {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 10px;
+			margin-top: 20px;
+			span {
+				font-size: 13px;
+				color: $grey;
+			}
+		}
+		.empty-list {
+			background: $white;
+			border-radius: $radius;
+		}
+	}
+
+	/** FILTER **/
+	.filter-config {
+		display: flex;
+		flex-direction: column;
+		gap: 26px;
+		padding: 28px 24px;
+		border-radius: $radius;
+		background: $white;
+		box-shadow: $shadow;
+		.find-your-home {
+			display: flex;
+			flex-direction: column;
+			> strong {
+				font-size: 15px;
+				font-weight: 600;
+				margin-bottom: 8px;
+			}
+			.MuiFormControlLabel-root {
+				margin: 0 0 0 -8px;
+				height: 34px;
+			}
+		}
+		.check-label {
+			display: flex;
+			gap: 6px;
+			font-size: 14px;
+			font-family: $font;
+			small {
+				color: $grey-2;
+			}
+		}
+		.input-row {
+			display: flex;
+			gap: 8px;
+		}
+		.input-box {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			height: 46px;
+			padding: 0 12px;
+			border: 1px solid #dedede;
+			border-radius: 10px;
+			svg {
+				color: $grey;
+				font-size: 20px;
+			}
+			input {
+				flex: 1;
+				width: 100%;
+				border: none;
+				outline: none;
+			}
+		}
+		.reset {
+			width: 46px;
+			border-radius: 10px;
+			border: 1px solid #dedede;
+			background: $white;
+			color: $dark;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.button-group {
+			display: flex;
+			flex-wrap: wrap;
+			border: 1px solid #dedede;
+			border-radius: 10px;
+			overflow: hidden;
+			button {
+				flex: 1;
+				height: 40px;
+				min-width: 40px;
+				border: none;
+				border-right: 1px solid #dedede;
+				background: $white;
+				font-size: 13px;
+				font-weight: 500;
+				&:last-child {
+					border-right: none;
+				}
+				&.active {
+					background: $dark;
+					color: $white;
+				}
+			}
+		}
+		.price-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			input {
+				flex: 1;
+				width: 100%;
+				height: 44px;
+				padding: 0 12px;
+				border: 1px solid #dedede;
+				border-radius: 10px;
+				outline: none;
+			}
+		}
+	}
+
+	/** DETAIL **/
+	.product-detail {
+		padding: 50px 0 90px;
+		.detail-top {
+			display: grid;
+			grid-template-columns: 1.15fr 1fr;
+			gap: 50px;
+			align-items: start;
+		}
+		.gallery {
+			display: flex;
+			flex-direction: column;
+			gap: 14px;
+			position: sticky;
+			top: 90px;
+		}
+		.main-image {
+			position: relative;
+			aspect-ratio: 4 / 3;
+			border-radius: $radius-lg;
+			overflow: hidden;
+			background: $bg-warm;
+			.product-image {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+			}
+			.sale {
+				position: absolute;
+				left: 18px;
+				top: 18px;
+				padding: 8px 14px;
+				border-radius: 8px;
+				background: $accent;
+				color: $white;
+				font-weight: 700;
+			}
+		}
+		.thumbs {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 14px;
+			button {
+				padding: 0;
+				aspect-ratio: 4 / 3;
+				border-radius: 10px;
+				overflow: hidden;
+				border: 2px solid transparent;
+				background: none;
+				opacity: 0.7;
+				transition: opacity 0.2s, border-color 0.2s;
+				.product-image {
+					width: 100%;
+					height: 100%;
+					display: block;
+					object-fit: cover;
+				}
+				&.active,
+				&:hover {
+					opacity: 1;
+					border-color: $dark;
+				}
+			}
+		}
+		.buy-box {
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+			.tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+				span:not(.status-chip) {
+					padding: 4px 10px;
+					border-radius: 6px;
+					background: $bg-soft;
+					font-size: 12px;
+					font-weight: 500;
+				}
+			}
+			h1 {
+				font-size: 36px;
+				font-weight: 600;
+				letter-spacing: -0.8px;
+				line-height: 1.15;
+			}
+			.sub {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 18px;
+				font-size: 13px;
+				color: $grey;
+				span {
+					display: inline-flex;
+					align-items: center;
+					gap: 4px;
+				}
+				svg {
+					font-size: 16px;
+				}
+			}
+			.price-box {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				padding: 20px 22px;
+				border-radius: $radius;
+				background: $bg-soft;
+				s {
+					display: block;
+					font-size: 14px;
+					color: $grey-2;
+				}
+				strong {
+					font-size: 34px;
+					font-weight: 700;
+					letter-spacing: -0.5px;
+				}
+				.installment {
+					font-size: 14px;
+					color: $green;
+					b {
+						font-weight: 600;
+					}
+				}
+			}
+			.color-row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 14px;
+				i {
+					width: 28px;
+					height: 28px;
+					border-radius: 50%;
+					border: 3px solid $white;
+					box-shadow: 0 0 0 1px $dark;
+				}
+				small {
+					color: $grey;
+					font-size: 12px;
+				}
+			}
+			.actions {
+				display: flex;
+				gap: 10px;
+				.grow {
+					flex: 1;
+					height: 54px;
+				}
+				.qty {
+					display: flex;
+					align-items: center;
+					height: 54px;
+					border: 1px solid #dedede;
+					border-radius: 10px;
+					button {
+						width: 42px;
+						height: 100%;
+						border: none;
+						background: none;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						svg {
+							font-size: 18px;
+						}
+					}
+					span {
+						min-width: 26px;
+						text-align: center;
+						font-weight: 600;
+					}
+				}
+				.like {
+					width: 54px;
+					height: 54px;
+					border-radius: 10px;
+					border: 1px solid #dedede;
+					background: $white;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					&.on {
+						color: $accent;
+						border-color: $accent;
+					}
+				}
+			}
+			.delivery {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				li {
+					display: flex;
+					gap: 12px;
+					align-items: center;
+					font-size: 14px;
+					color: #3c3c3c;
+					svg {
+						color: $accent;
+					}
+				}
+			}
+			.seller {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+				padding: 16px 18px;
+				border: 1px solid $line;
+				border-radius: $radius;
+				div {
+					flex: 1;
+					display: flex;
+					flex-direction: column;
+					a {
+						font-weight: 600;
+						&:hover {
+							color: $accent;
+						}
+					}
+					span {
+						font-size: 12px;
+						color: $grey;
+					}
+				}
+				.call {
+					display: inline-flex;
+					align-items: center;
+					gap: 6px;
+					padding: 10px 14px;
+					border-radius: 8px;
+					background: $bg-soft;
+					font-size: 13px;
+					font-weight: 500;
+					svg {
+						font-size: 17px;
+					}
+				}
+			}
+		}
+		.options-config {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			margin-top: 50px;
+			border: 1px solid $line;
+			border-radius: $radius;
+			.option {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				padding: 22px 24px;
+				border-right: 1px solid $line;
+				&:last-child {
+					border-right: none;
+				}
+				svg {
+					color: $accent;
+				}
+				span {
+					font-size: 13px;
+					color: $grey;
+				}
+				b {
+					font-size: 16px;
+					font-weight: 600;
+				}
+			}
+		}
+		.detail-tabs {
+			margin-top: 50px;
+			display: flex;
+			flex-direction: column;
+			gap: 26px;
+			.tab-body {
+				max-width: 860px;
+			}
+			.desc p {
+				font-size: 16px;
+				color: #3c3c3c;
+				line-height: 1.8;
+			}
+		}
+		.spec-table {
+			width: 100%;
+			border-collapse: collapse;
+			th,
+			td {
+				text-align: left;
+				padding: 14px 0;
+				border-bottom: 1px solid $line;
+				font-size: 14px;
+			}
+			th {
+				width: 260px;
+				color: $grey;
+				font-weight: 400;
+			}
+			td {
+				font-weight: 500;
+			}
+		}
+		.reviews {
+			display: flex;
+			flex-direction: column;
+			gap: 24px;
+			.review-form {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				padding: 22px;
+				border-radius: $radius;
+				background: $bg-soft;
+				.row {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+				}
+				textarea {
+					min-height: 100px;
+					padding: 12px 14px;
+					border: 1px solid #dedede;
+					border-radius: 10px;
+					resize: vertical;
+					outline: none;
+					line-height: 1.6;
+				}
+				.btn-dark {
+					align-self: flex-end;
+				}
+			}
+			.login-hint {
+				padding: 18px;
+				border-radius: $radius;
+				background: $bg-soft;
+				font-size: 14px;
+				a {
+					color: $accent;
+					font-weight: 600;
+				}
+			}
+			.review {
+				display: flex;
+				gap: 14px;
+				padding-bottom: 22px;
+				border-bottom: 1px solid $line;
+				.head {
+					display: flex;
+					align-items: center;
+					gap: 12px;
+					margin-bottom: 6px;
+					span {
+						font-size: 12px;
+						color: $grey;
+					}
+				}
+				p {
+					font-size: 15px;
+					color: #3c3c3c;
+				}
+			}
+		}
+		.similar {
+			margin-top: 80px;
+			.section-head {
+				margin-bottom: 30px;
+			}
+		}
+	}
+}

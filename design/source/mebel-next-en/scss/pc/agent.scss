@@ -1,0 +1,148 @@
+/** PC: sotuvchilar **/
+#pc-wrap {
+	.agent-list-page {
+		padding: 50px 0 90px;
+		background: $bg-soft;
+		.filter {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 30px;
+		}
+		.search {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			width: 420px;
+			height: 50px;
+			padding: 0 16px;
+			border-radius: 10px;
+			background: $white;
+			border: 1px solid $line;
+			svg {
+				color: $grey;
+			}
+			input {
+				flex: 1;
+				border: none;
+				outline: none;
+			}
+		}
+		.sort {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 14px;
+			color: $grey;
+			select {
+				height: 44px;
+				padding: 0 12px;
+				border-radius: 8px;
+				border: 1px solid $line;
+				background: $white;
+				font-weight: 600;
+			}
+		}
+		.agent-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 24px;
+			.agent-card {
+				width: 100%;
+			}
+		}
+	}
+
+	.agent-detail-page {
+		padding: 50px 0 90px;
+		.agent-hero {
+			display: grid;
+			grid-template-columns: auto 1fr auto;
+			grid-template-areas:
+				'avatar txt nums'
+				'avatar txt btns';
+			gap: 16px 30px;
+			align-items: center;
+			padding: 34px;
+			border-radius: $radius-lg;
+			background: $bg-warm;
+			.avatar {
+				grid-area: avatar;
+			}
+			.txt {
+				grid-area: txt;
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				h2 {
+					font-size: 28px;
+					font-weight: 600;
+				}
+				span {
+					display: inline-flex;
+					align-items: center;
+					gap: 4px;
+					font-size: 14px;
+					color: $grey;
+					svg {
+						font-size: 17px;
+					}
+				}
+				p {
+					max-width: 560px;
+					font-size: 15px;
+					color: #3c3c3c;
+				}
+			}
+			.nums {
+				grid-area: nums;
+				display: flex;
+				gap: 30px;
+				div {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+				}
+				b {
+					font-size: 24px;
+					font-weight: 600;
+					font-variant-numeric: tabular-nums;
+				}
+				span {
+					font-size: 12px;
+					color: $grey;
+				}
+			}
+			.btns {
+				grid-area: btns;
+				display: flex;
+				gap: 10px;
+			}
+		}
+		.agent-products {
+			margin-top: 50px;
+			h3 {
+				font-size: 24px;
+				font-weight: 600;
+				margin-bottom: 24px;
+				small {
+					color: $grey;
+					font-weight: 400;
+				}
+			}
+			.product-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 24px;
+				.product-card {
+					width: 100%;
+				}
+			}
+			.since {
+				margin-top: 30px;
+				font-size: 13px;
+				color: $grey;
+			}
+		}
+	}
+}

@@ -1,0 +1,160 @@
+/** PC: yordam markazi **/
+#pc-wrap .cs-page,
+#mobile-wrap .cs-page {
+	.cs-tabs {
+		display: flex;
+		gap: 12px;
+		margin-bottom: 30px;
+		button {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			height: 52px;
+			padding: 0 22px;
+			border-radius: 12px;
+			border: 1px solid $line;
+			background: $white;
+			font-size: 15px;
+			font-weight: 500;
+			&.active {
+				background: $dark;
+				border-color: $dark;
+				color: $white;
+			}
+		}
+	}
+	.notice-list {
+		border-top: 2px solid $dark;
+		.row {
+			border-bottom: 1px solid $line;
+		}
+		.head,
+		summary {
+			display: grid;
+			grid-template-columns: 70px 1fr 150px;
+			align-items: center;
+			padding: 18px 10px;
+			font-size: 14px;
+		}
+		.head {
+			color: $grey;
+			font-size: 13px;
+		}
+		summary {
+			cursor: pointer;
+			list-style: none;
+			&::-webkit-details-marker {
+				display: none;
+			}
+			b {
+				font-weight: 500;
+			}
+			span:last-child {
+				color: $grey;
+			}
+		}
+		details[open] summary b {
+			color: $accent;
+		}
+		details p {
+			padding: 0 10px 20px 80px;
+			color: #3c3c3c;
+			font-size: 14px;
+		}
+	}
+	.faq-box {
+		display: flex;
+		flex-direction: column;
+		gap: 22px;
+	}
+	.faq-list {
+		border-top: 2px solid $dark;
+		.MuiAccordion-root {
+			border-bottom: 1px solid $line;
+			&::before {
+				display: none;
+			}
+		}
+		.MuiAccordionSummary-content {
+			align-items: center;
+			gap: 14px;
+			font-family: $font;
+			font-weight: 500;
+		}
+		.q {
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			background: $accent;
+			color: $white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 13px;
+			font-weight: 700;
+			flex-shrink: 0;
+		}
+		.MuiAccordionDetails-root {
+			padding: 0 16px 20px 60px;
+			color: #3c3c3c;
+			font-family: $font;
+			font-size: 14px;
+			line-height: 1.7;
+		}
+	}
+	.inquiry-box {
+		display: grid;
+		gap: 30px;
+		.contact {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 30px;
+			border-radius: $radius;
+			background: $dark;
+			color: rgba(255, 255, 255, 0.75);
+			h3 {
+				color: $white;
+				font-size: 22px;
+				font-weight: 600;
+			}
+			b {
+				color: $white;
+				font-size: 24px;
+			}
+		}
+		.inquiry-form {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 18px;
+			.wide {
+				grid-column: 1 / -1;
+			}
+		}
+		.sent {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			text-align: center;
+			color: $grey;
+			svg {
+				font-size: 60px;
+				color: $green;
+			}
+			strong {
+				color: $dark;
+				font-size: 20px;
+			}
+		}
+	}
+}
+
+#pc-wrap .cs-page {
+	padding: 50px 0 90px;
+	.inquiry-box {
+		grid-template-columns: 380px 1fr;
+		align-items: start;
+	}
+}

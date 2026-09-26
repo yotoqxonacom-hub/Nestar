@@ -28,7 +28,8 @@ Bu branch (`claude/furniture-store-er-model-ezqtk7`) yumshoq mebel do'koni ishla
 ## Boshqa papkalar
 
 - `mebel-next/` — o'zbekcha Next.js frontend (demo ma'lumotlar bilan). Report hali qo'shilmagan.
-- Dizayn faylidagi inglizcha ekranlar vaqtinchalik nusxadan olingan; ularning manba kodi repoda yo'q.
+- `design/source/mebel-next-en/` — dizayn faylidagi inglizcha ekranlarning manba kodi (Report bilan).
+- `design/tools/` — skrinshot olish va dizayn faylini qayta yig'ish skriptlari (`design/README.md`).
 
 ## Havolalar
 

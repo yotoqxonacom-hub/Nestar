@@ -1,0 +1,305 @@
+/** ADMIN (PC va planshet) **/
+#admin-wrap {
+	display: flex;
+	min-height: 100vh;
+	background: $bg-soft;
+
+	.admin-side {
+		width: 260px;
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 30px;
+		padding: 26px 16px;
+		background: $dark;
+		position: sticky;
+		top: 0;
+		height: 100vh;
+		.logo {
+			padding: 0 10px;
+		}
+		nav {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			flex: 1;
+			a {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				height: 46px;
+				padding: 0 14px;
+				border-radius: 10px;
+				color: rgba(255, 255, 255, 0.7);
+				font-size: 14px;
+				svg {
+					font-size: 20px;
+				}
+				&:hover {
+					background: rgba(255, 255, 255, 0.06);
+					color: $white;
+				}
+				&.active {
+					background: $accent;
+					color: $white;
+				}
+			}
+		}
+		.admin-user {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			padding: 12px;
+			border-radius: 10px;
+			background: $dark-2;
+			color: $white;
+			font-size: 13px;
+			> span:not(.avatar) {
+				flex: 1;
+			}
+			button {
+				border: none;
+				background: none;
+				color: rgba(255, 255, 255, 0.6);
+				display: flex;
+			}
+		}
+	}
+
+	.admin-main {
+		flex: 1;
+		min-width: 0;
+		padding: 34px 40px;
+	}
+
+	.admin-page {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+	.admin-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 16px;
+		h1 {
+			font-size: 26px;
+			font-weight: 600;
+		}
+		.search {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			width: 320px;
+			height: 44px;
+			padding: 0 14px;
+			border-radius: 10px;
+			background: $white;
+			border: 1px solid $line;
+			svg {
+				color: $grey;
+			}
+			input {
+				flex: 1;
+				border: none;
+				outline: none;
+				min-width: 0;
+			}
+		}
+	}
+	.kpis {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 18px;
+	}
+	.kpi {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding: 22px;
+		border-radius: $radius;
+		background: $white;
+		border: 1px solid $line;
+		span {
+			font-size: 13px;
+			color: $grey;
+		}
+		b {
+			font-size: 22px;
+			font-weight: 600;
+			white-space: nowrap;
+		}
+		small {
+			font-size: 12px;
+			color: $grey;
+			&.up {
+				color: $green;
+			}
+			&.warn {
+				color: #b7791f;
+			}
+		}
+	}
+	.panel {
+		padding: 24px;
+		border-radius: $radius;
+		background: $white;
+		border: 1px solid $line;
+		h3 {
+			font-size: 17px;
+			font-weight: 600;
+			margin-bottom: 18px;
+		}
+	}
+	.bars {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+	.bar-row {
+		display: grid;
+		grid-template-columns: 150px 1fr 70px;
+		align-items: center;
+		gap: 14px;
+		font-size: 13px;
+		b {
+			text-align: right;
+			font-weight: 500;
+		}
+		.bar {
+			height: 12px;
+			border-radius: 6px;
+			background: $bg-soft;
+			overflow: hidden;
+			i {
+				display: block;
+				height: 100%;
+				border-radius: 6px;
+				background: $accent;
+			}
+		}
+	}
+	.table-wrap {
+		overflow-x: auto;
+		border-radius: $radius;
+		background: $white;
+		border: 1px solid $line;
+	}
+	.admin-table {
+		width: 100%;
+		border-collapse: collapse;
+		min-width: 760px;
+		th,
+		td {
+			padding: 14px 16px;
+			text-align: left;
+			font-size: 14px;
+			border-bottom: 1px solid $line;
+			vertical-align: middle;
+		}
+		th {
+			font-size: 12px;
+			font-weight: 500;
+			color: $grey;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			background: #fafafa;
+		}
+		tr:last-child td {
+			border-bottom: none;
+		}
+		.who {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			div {
+				display: flex;
+				flex-direction: column;
+				span {
+					font-size: 12px;
+					color: $grey;
+				}
+			}
+			b {
+				font-weight: 500;
+			}
+		}
+		.thumb .product-image {
+			width: 56px;
+			height: 42px;
+			border-radius: 6px;
+			object-fit: cover;
+			display: block;
+		}
+		.group-tag {
+			display: block;
+			font-size: 11px;
+			font-weight: 600;
+			letter-spacing: 0.05em;
+			text-transform: uppercase;
+			color: $grey;
+			margin-bottom: 2px;
+		}
+		.desc {
+			max-width: 280px;
+			color: #3c3c3c;
+			font-size: 13px;
+		}
+		.hint {
+			display: block;
+			margin-top: 4px;
+			font-size: 11px;
+			color: $grey;
+		}
+	}
+	.status-select {
+		border: none;
+		outline: none;
+		cursor: pointer;
+		appearance: none;
+		padding-right: 12px;
+		font-family: $font;
+		&::before {
+			display: none;
+		}
+	}
+}
+
+@media (max-width: 900px) {
+	#admin-wrap {
+		flex-direction: column;
+		.admin-side {
+			width: 100%;
+			height: auto;
+			position: static;
+			gap: 14px;
+			padding: 16px;
+			nav {
+				flex-direction: row;
+				overflow-x: auto;
+				a {
+					white-space: nowrap;
+				}
+			}
+			.admin-user {
+				display: none;
+			}
+		}
+		.admin-main {
+			padding: 20px 16px;
+		}
+		.admin-head {
+			flex-direction: column;
+			align-items: stretch;
+			.search {
+				width: 100%;
+			}
+		}
+		.kpis {
+			grid-template-columns: 1fr 1fr;
+		}
+		.bar-row {
+			grid-template-columns: 100px 1fr 56px;
+		}
+	}
+}
