@@ -28,6 +28,7 @@ o'zgarmagan holda saqlandi. `Property` o'rnini `Product` (yumshoq mebel) egallad
 | `Notification`          | `Notification`           | `propertyId` → `productId`                      |
 | —                       | **`Order`** (yangi)      | Buyurtma                                        |
 | —                       | **`OrderItem`** (yangi)  | Buyurtmadagi mahsulotlar                        |
+| —                       | **`Report`** (yangi)     | Mahsulot, agent yoki maqola ustidan shikoyat    |
 
 ## 2. ER diagramma
 
@@ -54,6 +55,10 @@ erDiagram
     MEMBER ||--o{ NOTIFICATION   : "receiverId"
     PRODUCT ||--o{ NOTIFICATION  : "productId"
     BOARD_ARTICLE ||--o{ NOTIFICATION : "articleId"
+    MEMBER ||--o{ REPORT         : "shikoyat qiladi"
+    PRODUCT       ||--o{ REPORT  : "reportRefId (PRODUCT)"
+    MEMBER        ||--o{ REPORT  : "reportRefId (MEMBER)"
+    BOARD_ARTICLE ||--o{ REPORT  : "reportRefId (ARTICLE)"
 
     PRODUCT       ||--o{ LIKE    : "likeRefId (PRODUCT)"
     BOARD_ARTICLE ||--o{ LIKE    : "likeRefId (ARTICLE)"
@@ -222,6 +227,18 @@ erDiagram
         date createdAt
         date updatedAt
     }
+
+    REPORT {
+        ObjectId _id PK
+        ReportStatus reportStatus
+        ReportGroup reportGroup
+        ReportReason reportReason
+        string reportDesc
+        ObjectId reportRefId "polimorf"
+        ObjectId memberId FK
+        date createdAt
+        date updatedAt
+    }
 ```
 
 > **Polimorf bog'lanishlar** (Nestar'dagi kabi): `Like`, `View`, `Comment` bitta `*RefId` maydoni
@@ -229,6 +246,7 @@ erDiagram
 > Masalan `likeGroup = PRODUCT` bo'lsa `likeRefId` → `products._id`,
 > `likeGroup = MEMBER` bo'lsa → `members._id` (sotuvchini yoqtirish).
 > `commentGroup = COMMENT` esa izohga javob (reply) degani.
+> `Report` ham shu usulda ishlaydi: `reportGroup = PRODUCT | MEMBER | ARTICLE` va `reportRefId`.
 
 ## 3. Enumlar
 
@@ -279,6 +297,11 @@ enum NoticeStatus   { HOLD, ACTIVE, DELETE }
 enum NotificationType   { LIKE, COMMENT, FOLLOW, ORDER }
 enum NotificationStatus { WAIT, READ }
 enum NotificationGroup  { MEMBER, ARTICLE, PRODUCT, ORDER }
+
+// report.enum.ts   (yangi)
+enum ReportGroup  { MEMBER, PRODUCT, ARTICLE }
+enum ReportReason { WRONG_DESCRIPTION, POOR_QUALITY, FAKE_PRODUCT, RUDE_AGENT, NOT_DELIVERED, OTHER }
+enum ReportStatus { PENDING, RESOLVED, REJECTED }
 ```
 
 ## 4. Bog'lanishlar (kardinallik)
@@ -297,6 +320,8 @@ enum NotificationGroup  { MEMBER, ARTICLE, PRODUCT, ORDER }
 | Product / Article / Member / Comment → Comment | 1 : N | polimorf (`commentRefId` + `commentGroup`) |
 | Member (ADMIN) → Notice             | 1 : N |                                                      |
 | Member → Notification               | 1 : N | `authorId` (kim), `receiverId` (kimga)               |
+| Member → Report                     | 1 : N | `memberId` — shikoyat qilgan foydalanuvchi           |
+| Product / Member / Article → Report | 1 : N | polimorf (`reportRefId` + `reportGroup`)             |
 
 ## 5. Indekslar (Mongoose)
 
@@ -320,6 +345,9 @@ FollowSchema.index({ followingId: 1, followerId: 1 }, { unique: true });
 
 // OrderItemSchema
 OrderItemSchema.index({ orderId: 1, productId: 1 }, { unique: true });
+
+// ReportSchema — bitta foydalanuvchi bitta obyektga faqat 1 marta shikoyat qiladi
+ReportSchema.index({ memberId: 1, reportRefId: 1 }, { unique: true });
 ```
 
 ## 6. Biznes qoidalari
@@ -333,6 +361,12 @@ OrderItemSchema.index({ orderId: 1, productId: 1 }, { unique: true });
 - `productViews`, `productLikes`, `productComments`, `memberFollowers` va h.k. —
   Nestar'dagi kabi `$inc` orqali yangilanadigan denormalizatsiyalangan hisoblagichlar.
 - O'chirish yumshoq (soft delete): `*Status = DELETE` va `deletedAt`.
+- Shikoyat `PENDING` holatida yaratiladi. O'z mahsuloti, o'zi yoki o'z maqolasi ustidan shikoyat qilib bo'lmaydi.
+- Admin shikoyatni `RESOLVED` qilsa, javobgar a'zoning (mahsulot agenti, maqola muallifi yoki
+  shikoyat qilingan a'zo) `memberWarnings` hisoblagichi 1 ga oshadi; holat qaytarilsa 1 ga kamayadi.
+  Keyin admin xohlasa a'zoni `memberStatus = BLOCK` qiladi.
+- GraphQL: `createReport`, `getMyReports` (foydalanuvchi), `getAllReportsByAdmin`,
+  `updateReportByAdmin` (faqat ADMIN).
 
 ## 7. Autentifikatsiya (JWT token)
 
@@ -348,4 +382,4 @@ Nestar'dagi kabi autentifikatsiya **JWT token** orqali ishlaydi, server tomonda 
 ## 8. Kolleksiyalar (MongoDB)
 
 `members`, `products`, `orders`, `orderItems`, `boardArticles`, `comments`, `likes`, `views`,
-`follows`, `notices`, `notifications`
+`follows`, `notices`, `notifications`, `reports`

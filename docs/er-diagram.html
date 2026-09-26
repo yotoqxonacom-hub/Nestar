@@ -69,7 +69,7 @@
 <div class="canvas-wrap">
   <svg id="er" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1310" role="img" aria-label="Yumshoq mebel do'koni ER diagrammasi"></svg>
 </div>
-<footer>Autentifikatsiya JWT token orqali (<code>Authorization: Bearer &lt;accessToken&gt;</code>): token bazada saqlanmaydi, shuning uchun <code>sessions</code> kolleksiyasi yo'q. Polimorf bog'lanishlar: <code>viewRefId</code>, <code>likeRefId</code> va <code>commentRefId</code> guruh maydoniga qarab (<code>PRODUCT</code> / <code>ARTICLE</code> / <code>MEMBER</code>, izohda yana <code>COMMENT</code>) turli kolleksiyaga ishora qiladi; diagrammada asosiy holat — <code>products</code> ko'rsatilgan.</footer>
+<footer>Autentifikatsiya JWT token orqali (<code>Authorization: Bearer &lt;accessToken&gt;</code>): token bazada saqlanmaydi, shuning uchun <code>sessions</code> kolleksiyasi yo'q. Polimorf bog'lanishlar: <code>viewRefId</code>, <code>likeRefId</code>, <code>commentRefId</code> va <code>reportRefId</code> guruh maydoniga qarab (<code>PRODUCT</code> / <code>ARTICLE</code> / <code>MEMBER</code>, izohda yana <code>COMMENT</code>) turli kolleksiyaga ishora qiladi; diagrammada asosiy holat — <code>products</code> ko'rsatilgan.</footer>
 
 <script>
 const BLUE = '#09a4ec', GREEN = '#0b8a12';
@@ -110,6 +110,9 @@ const tables = {
     ['productDepth','int'], ['productHeight','int'], ['productFoldable','boolean'], ['productInstallment','boolean'], ['productImages','array'],
     ['productDesc','string'], ['productViews','int'], ['productLikes','int'], ['productComments','int'], ['productRank','int'],
     ['memberId','objectId','fk'], ['createdAt','date'], ['updatedAt','date'] ] },
+  reports: { x: 960, y: 880, color: BLUE, fields: [
+    ['_id','objectId','pk'], ['reportStatus','enum'], ['reportGroup','enum'], ['reportReason','enum'],
+    ['reportDesc','string'], ['reportRefId','objectId','fk'], ['memberId','objectId','fk'], ['createdAt','date'], ['updatedAt','date'] ] },
   boardArticles: { x: 960, y: 560, color: GREEN, fields: [
     ['_id','objectId','pk'], ['articleCategory','enum'], ['articleStatus','enum'], ['articleTitle','string'],
     ['articleContent','string'], ['articleImage','string'], ['articleViews','int'], ['articleLikes','int'],
@@ -131,6 +134,8 @@ const links = [
   { from: ['boardArticles','memberId'], to: ['members','_id'], fs: 'L', ts: 'R' },
   { from: ['comments','commentRefId'], to: ['products','_id'], fs: 'R', ts: 'L' },
   { from: ['comments','memberId'],     to: ['members','_id'],  fs: 'R', ts: 'L' },
+  { from: ['reports','reportRefId'],  to: ['products','_id'], fs: 'L', ts: 'R' },
+  { from: ['reports','memberId'],     to: ['members','_id'],  fs: 'L', ts: 'R' },
 ];
 
 const NS = 'http://www.w3.org/2000/svg';
