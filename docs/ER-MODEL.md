@@ -334,7 +334,18 @@ OrderItemSchema.index({ orderId: 1, productId: 1 }, { unique: true });
   Nestar'dagi kabi `$inc` orqali yangilanadigan denormalizatsiyalangan hisoblagichlar.
 - O'chirish yumshoq (soft delete): `*Status = DELETE` va `deletedAt`.
 
-## 7. Kolleksiyalar (MongoDB)
+## 7. Autentifikatsiya (JWT token)
+
+Nestar'dagi kabi autentifikatsiya **JWT token** orqali ishlaydi, server tomonda sessiya saqlanmaydi:
+
+- `signup` / `login` mutatsiyalari `Member` bilan birga `accessToken` qaytaradi.
+- Token payload'i: `_id`, `memberType`, `memberStatus`, `memberAuthType`, `memberNick`, `memberPhone`, ...
+  (`Nestar-next` → `libs/types/customJwtPayload.ts`).
+- Mijoz har bir so'rovda `Authorization: Bearer <accessToken>` sarlavhasini yuboradi;
+  backend `AuthGuard` / `RolesGuard` tokenni tekshiradi (`memberType` bo'yicha ruxsat).
+- `accessToken` bazaga yozilmaydi (faqat javobda qaytadi), shuning uchun **`sessions` kolleksiyasi yo'q**.
+
+## 8. Kolleksiyalar (MongoDB)
 
 `members`, `products`, `orders`, `orderItems`, `boardArticles`, `comments`, `likes`, `views`,
 `follows`, `notices`, `notifications`
