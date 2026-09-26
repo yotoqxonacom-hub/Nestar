@@ -1,0 +1,277 @@
+/** PC: mening sahifam **/
+#pc-wrap .mypage,
+#mobile-wrap .mypage {
+	.my-menu {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		.profile {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 4px;
+			padding: 26px 20px;
+			border-radius: $radius;
+			background: $dark;
+			color: $white;
+			text-align: center;
+			.avatar {
+				margin-bottom: 8px;
+			}
+			b {
+				font-size: 17px;
+				font-weight: 600;
+			}
+			span {
+				font-size: 13px;
+				color: rgba(255, 255, 255, 0.65);
+			}
+			.type {
+				margin-top: 8px;
+				padding: 4px 12px;
+				border-radius: 12px;
+				background: rgba(235, 103, 83, 0.2);
+				color: #ff9a88;
+				font-size: 12px;
+			}
+		}
+		nav {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			button {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				height: 48px;
+				padding: 0 16px;
+				border-radius: 10px;
+				border: none;
+				background: none;
+				color: $dark;
+				font-size: 14px;
+				text-align: left;
+				svg {
+					font-size: 20px;
+					color: $grey;
+				}
+				span {
+					flex: 1;
+				}
+				em {
+					font-style: normal;
+					font-size: 12px;
+					min-width: 22px;
+					height: 22px;
+					border-radius: 11px;
+					background: $bg-soft;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+				&:hover {
+					background: $bg-soft;
+				}
+				&.active {
+					background: $accent-soft;
+					color: $accent;
+					font-weight: 600;
+					svg {
+						color: $accent;
+					}
+				}
+			}
+		}
+	}
+	.my-content {
+		display: flex;
+		flex-direction: column;
+		gap: 22px;
+		min-width: 0;
+		h2 {
+			font-size: 26px;
+			font-weight: 600;
+		}
+		.write-btn {
+			align-self: flex-start;
+		}
+	}
+	.order-list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+	.order-card {
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
+		padding: 22px;
+		border-radius: $radius;
+		border: 1px solid $line;
+		background: $white;
+		.order-head {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			gap: 12px;
+			div {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+			b {
+				font-size: 16px;
+			}
+			span:not(.status-chip) {
+				font-size: 13px;
+				color: $grey;
+			}
+		}
+		.order-steps {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			li {
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: $grey-2;
+				i {
+					width: 14px;
+					height: 14px;
+					border-radius: 50%;
+					background: $line;
+					z-index: 1;
+				}
+				&::before {
+					content: '';
+					position: absolute;
+					top: 6px;
+					left: -50%;
+					width: 100%;
+					height: 2px;
+					background: $line;
+				}
+				&:first-child::before {
+					display: none;
+				}
+				&.done {
+					color: $dark;
+					font-weight: 500;
+					i {
+						background: $accent;
+					}
+					&::before {
+						background: $accent;
+					}
+				}
+			}
+		}
+		.order-items {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+		.order-item {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			padding: 8px 14px 8px 8px;
+			border-radius: 10px;
+			background: $bg-soft;
+			.product-image {
+				width: 72px;
+				height: 54px;
+				border-radius: 8px;
+				object-fit: cover;
+				display: block;
+			}
+			div {
+				display: flex;
+				flex-direction: column;
+				b {
+					font-size: 14px;
+				}
+				span {
+					font-size: 12px;
+					color: $grey;
+				}
+			}
+		}
+		.order-foot {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding-top: 14px;
+			border-top: 1px solid $line;
+			font-size: 14px;
+			color: $grey;
+			b {
+				color: $dark;
+				font-size: 17px;
+			}
+			.btn-outline {
+				height: 40px;
+			}
+		}
+	}
+	.profile-form {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 18px;
+		padding: 26px;
+		border: 1px solid $line;
+		border-radius: $radius;
+		.wide {
+			grid-column: 1 / -1;
+		}
+		.actions {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			.ok {
+				color: $green;
+				font-size: 14px;
+			}
+		}
+	}
+}
+
+#pc-wrap .mypage {
+	padding: 50px 0 90px;
+	.container:not(.col) {
+		gap: 40px;
+		align-items: flex-start;
+	}
+	.my-menu {
+		width: 280px;
+		flex-shrink: 0;
+		position: sticky;
+		top: 90px;
+	}
+	.my-content {
+		flex: 1;
+	}
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+		.product-card {
+			width: 100%;
+		}
+	}
+	.article-grid,
+	.agent-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+		.agent-card {
+			width: 100%;
+		}
+	}
+}

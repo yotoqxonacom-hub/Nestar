@@ -1,0 +1,250 @@
+/** PC: savat va buyurtma **/
+#pc-wrap .cart-page,
+#mobile-wrap .cart-page {
+	.cart-items {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	.cart-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 6px;
+		h2 {
+			font-size: 22px;
+			font-weight: 600;
+		}
+		button {
+			border: none;
+			background: none;
+			color: $accent;
+			font-weight: 500;
+			font-size: 14px;
+		}
+	}
+	.cart-item {
+		display: grid;
+		grid-template-columns: 150px 1fr auto 180px 44px;
+		align-items: center;
+		gap: 20px;
+		padding: 14px;
+		border-radius: $radius;
+		background: $white;
+		border: 1px solid $line;
+		.img {
+			display: block;
+			aspect-ratio: 4 / 3;
+			border-radius: 10px;
+			overflow: hidden;
+			.product-image {
+				width: 100%;
+				height: 100%;
+				display: block;
+				object-fit: cover;
+			}
+		}
+		.info {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			min-width: 0;
+			.title {
+				font-weight: 600;
+				font-size: 16px;
+				&:hover {
+					color: $accent;
+				}
+			}
+			.meta,
+			.seller {
+				font-size: 13px;
+				color: $grey;
+			}
+		}
+		.qty {
+			display: flex;
+			align-items: center;
+			height: 42px;
+			border: 1px solid #dedede;
+			border-radius: 10px;
+			button {
+				width: 36px;
+				height: 100%;
+				border: none;
+				background: none;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				svg {
+					font-size: 17px;
+				}
+			}
+			span {
+				min-width: 24px;
+				text-align: center;
+				font-weight: 600;
+			}
+		}
+		.price {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			s {
+				font-size: 12px;
+				color: $grey-2;
+			}
+			b {
+				font-size: 17px;
+				font-weight: 600;
+			}
+		}
+		.remove {
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			border: none;
+			background: $bg-soft;
+			color: $grey;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			&:hover {
+				color: #c0392b;
+			}
+		}
+	}
+	.checkout {
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
+		padding: 28px;
+		border-radius: $radius;
+		background: $white;
+		border: 1px solid $line;
+		box-shadow: $shadow;
+		h3 {
+			font-size: 20px;
+			font-weight: 600;
+		}
+		.pay-options {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 8px;
+			label {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 46px;
+				border-radius: 10px;
+				border: 1px solid #dedede;
+				font-size: 13px;
+				font-weight: 500;
+				cursor: pointer;
+				text-align: center;
+				input {
+					position: absolute;
+					opacity: 0;
+					pointer-events: none;
+				}
+				&.active {
+					border-color: $dark;
+					background: $dark;
+					color: $white;
+				}
+			}
+		}
+		.sum {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding-top: 14px;
+			border-top: 1px solid $line;
+			div {
+				display: flex;
+				justify-content: space-between;
+				font-size: 14px;
+			}
+			dt {
+				color: $grey;
+			}
+			dd {
+				margin: 0;
+				font-weight: 500;
+			}
+			.saved dd {
+				color: $green;
+			}
+			.total {
+				padding-top: 10px;
+				border-top: 1px dashed $line;
+				dt {
+					color: $dark;
+					font-weight: 600;
+				}
+				dd {
+					font-size: 22px;
+					font-weight: 700;
+				}
+			}
+		}
+		.hint {
+			font-size: 13px;
+			color: $green;
+		}
+		.btn-accent,
+		.btn-dark {
+			height: 54px;
+		}
+	}
+	.order-done {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 14px;
+		padding: 60px 20px;
+		svg {
+			font-size: 72px;
+			color: $green;
+		}
+		h2 {
+			font-size: 28px;
+			font-weight: 600;
+		}
+		p {
+			color: $grey;
+			max-width: 460px;
+		}
+		.row {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 12px;
+			margin-top: 10px;
+		}
+	}
+}
+
+#pc-wrap .cart-page {
+	padding: 50px 0 90px;
+	background: $bg-soft;
+	.container:not(.col) {
+		gap: 30px;
+		align-items: flex-start;
+	}
+	.cart-items {
+		flex: 1;
+	}
+	.checkout {
+		width: 400px;
+		flex-shrink: 0;
+		position: sticky;
+		top: 90px;
+	}
+	.empty-list {
+		background: $white;
+		border-radius: $radius;
+	}
+}
