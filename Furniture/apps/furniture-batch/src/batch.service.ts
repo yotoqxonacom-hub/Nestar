@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Product } from '../../nestar-api/src/libs/dto/product/product';
-import { Member } from '../../nestar-api/src/libs/dto/member/member';
-import { ProductStatus } from '../../nestar-api/src/libs/enums/product.enum';
-import { MemberStatus, MemberType } from '../../nestar-api/src/libs/enums/member.enum';
+import { Product } from '../../furniture-api/src/libs/dto/product/product';
+import { Member } from '../../furniture-api/src/libs/dto/member/member';
+import { ProductStatus } from '../../furniture-api/src/libs/enums/product.enum';
+import { MemberStatus, MemberType } from '../../furniture-api/src/libs/enums/member.enum';
 
 @Injectable()
 export class BatchService {
@@ -69,6 +69,6 @@ export class BatchService {
 	}
 
 	public getHello(): string {
-		return 'Welcome to Nestar BATCH Server!';
+		return 'Welcome to Furniture BATCH Server!';
 	}
 }

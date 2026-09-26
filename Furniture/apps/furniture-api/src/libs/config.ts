@@ -29,6 +29,7 @@ export const availableProductSorts = [
 	'productPrice',
 ];
 export const availableCommentSorts = ['createdAt', 'updatedAt'];
+export const availableReportSorts = ['createdAt', 'updatedAt'];
 
 // IMAGE CONFIGURATION (config.js)
 import { v4 as uuidv4 } from 'uuid';
