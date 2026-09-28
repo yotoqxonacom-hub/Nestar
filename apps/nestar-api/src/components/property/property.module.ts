@@ -19,4 +19,4 @@ import { LikeModule } from '../like/like.module';
 	providers: [PropertyResolver, PropertyService],
 	exports: [PropertyService],
 })
-export class PropertyModule {}
+export class PropertyModule { }
